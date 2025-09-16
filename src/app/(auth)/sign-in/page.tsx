@@ -19,8 +19,8 @@ export default function SignIn() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
@@ -31,8 +31,8 @@ export default function SignIn() {
       // Here you would typically handle the user creation in your own database
       // For now, we just redirect to the dashboard
       router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
@@ -109,7 +109,7 @@ export default function SignIn() {
           </button>
         </div>
         <p className="text-sm text-center text-gray-500">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/sign-up" className="font-medium text-indigo-600 hover:text-indigo-500">
             Sign up
           </Link>

@@ -8,7 +8,7 @@ export default async function handler(
 ) {
   if (req.method === 'POST') {
     try {
-      const { email, name, image, provider } = req.body;
+      const { email, name, image } = req.body;
       const client = await clientPromise;
       const db = client.db(process.env.MONGODB_DB);
       const usersCollection = db.collection<User>('users');

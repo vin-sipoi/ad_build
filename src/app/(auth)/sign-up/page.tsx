@@ -21,8 +21,8 @@ export default function SignUp() {
       // Here you would typically handle the user creation in your own database
       // For now, we just redirect to the dashboard
       router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
@@ -33,8 +33,8 @@ export default function SignUp() {
       // Here you would typically handle the user creation in your own database
       // For now, we just redirect to the dashboard
       router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
