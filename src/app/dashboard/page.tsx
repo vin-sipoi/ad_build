@@ -1,28 +1,30 @@
 'use client';
 
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { CourseList } from '@/components/academy/CourseList';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+
+import { JourneyProgress } from '@/components/dashboard';
 
 export default function Dashboard() {
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push('/sign-in');
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 text-center bg-white rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold">Welcome to your Dashboard</h1>
-        <p className="text-gray-500">You are successfully logged in.</p>
-        <button
-          onClick={handleSignOut}
-          className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Sign Out
-        </button>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold">Adamur Academy</h1>
+        <div className="relative w-80">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search modules, tools, or resources"
+            className="pl-10 bg-card border-border"
+          />
+        </div>
+      </div>
+      
+      <JourneyProgress />
+      
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Your Learning Path</h2>
+        <CourseList />
       </div>
     </div>
   );
