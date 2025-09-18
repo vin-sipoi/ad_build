@@ -44,11 +44,4 @@ export interface Achievement {
   type: 'admission' | 'lab' | 'launchpad' | 'alumni';
 }
 
-export interface UserProgress {
-  userId: string;
-  courseId: string;
-  moduleId: string;
-  completedLessons: string[];
-  progressPercentage: number;
-  lastAccessedAt: Date;
-}
+// UserProgress moved to academy.ts to avoid duplicate exports

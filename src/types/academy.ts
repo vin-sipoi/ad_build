@@ -1,30 +1,66 @@
-// Academy and Learning Types
+// Academy and Learning Types - Roadmap Structure
 import { UserRole } from './user';
-export interface Course {
-  _id?: string;
+
+export interface Subtopic {
+  id: string;
+  title: string;
+  description?: string; // made optional to accommodate existing mock data
+  content: string;
+  type: 'text' | 'video' | 'quiz' | 'interactive';
+  estimatedTime: string;
+  isCompleted: boolean;
+  resources?: Resource[];
+}
+
+export interface Topic {
+  id: string;
   title: string;
   description: string;
-  thumbnail: string;
-  modules: Module[];
-  requiredRole: UserRole[];
-  creditsRequired: number;
-  creditsReward: number;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  estimatedHours: number;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
+  subtopics: Subtopic[];
+  estimatedTime: string;
+  prerequisites?: string[];
+  isUnlocked: boolean;
+  isCompleted: boolean;
+  isLocked: boolean;
 }
 
 export interface Module {
   id: string;
   title: string;
   description: string;
-  lessons: Lesson[];
+  topics: Topic[];
+  estimatedTime: string;
+  creditsRequired: number;
+  creditsReward: number;
   order: number;
-  isLocked: boolean;
 }
 
+export interface Course {
+  _id?: string;
+  id: string;
+  title: string;
+  description: string;
+  instructor: string;
+  thumbnail: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  duration: string;
+  estimatedHours: number;
+  modules: Module[];
+  creditsRequired: number;
+  creditsReward: number; // canonical
+  creditReward?: number; // temporary backward compatibility
+  enrolledCount: number;
+  rating: number;
+  tags: string[];
+  isEnrolled: boolean;
+  progress: number;
+  requiredRole?: UserRole[];
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Legacy interface for backward compatibility
 export interface Lesson {
   id: string;
   title: string;
@@ -58,4 +94,14 @@ export interface Question {
   options?: string[];
   correctAnswer: string | string[];
   explanation?: string;
+}
+
+export interface UserProgress {
+  courseId: string;
+  completedModules: string[];
+  completedTopics: string[];
+  completedSubtopics: string[];
+  lastAccessedModule?: string;
+  lastAccessedTopic?: string;
+  totalTimeSpent: number;
 }

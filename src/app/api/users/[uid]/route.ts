@@ -22,46 +22,32 @@ export async function GET(
     ]);
     
     const db = client.db('adamur_academy');
-    
     const user = await db.collection('users').findOne({ uid });
     
-    if (!user) {
-      // Return a default user object when not found in database
+    if (user) {
       return NextResponse.json({
-        name: 'Founder',
-        email: '',
-        role: 'learner',
-        journeyStage: 'residency',
-        credits: 500,
-        completedCourses: [],
-        unlockedModules: []
+        name: user.name || 'Founder',
+        email: user.email || '',
+        role: user.role || 'learner',
+        journeyStage: user.journeyStage || 'residency',
+        credits: user.credits || 500,
+        nftBadges: user.nftBadges || [],
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       });
     }
-
-    return NextResponse.json({
-      name: user.name || 'Founder',
-      email: user.email || '',
-      role: user.role || 'learner',
-      journeyStage: user.journeyStage || 'residency',
-      credits: user.credits || 500,
-      nftBadges: user.nftBadges || [],
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    });
-    
   } catch (error) {
-    console.error('Error fetching user:', error);
-    
-    // Return fallback user data when database is unavailable
-    return NextResponse.json({
-      name: 'Founder',
-      email: '',
-      role: 'learner',
-      journeyStage: 'residency',
-      credits: 500,
-      nftBadges: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    console.error('Error fetching user from DB, falling back to default:', error);
   }
+
+  // Fallback to default user object if DB fails or user not found
+  return NextResponse.json({
+    name: 'Founder',
+    email: '',
+    role: 'learner',
+    journeyStage: 'residency',
+    credits: 500,
+    completedCourses: [],
+    unlockedModules: []
+  });
 }

@@ -17,21 +17,19 @@ export function Logo({ size = 'md', variant = 'light', showText = true }: LogoPr
   const logoSrc = variant === 'light' ? '/Adamur_White_BG.png' : '/Adamur_Dark_Background - PNG.png';
   
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <div className={`relative ${sizeClasses[size]}`}>
         <Image
           src={logoSrc}
           alt="Adamur"
-          fill
+          width={32}
+          height={32}
           className="object-contain"
           priority
         />
       </div>
       {showText && (
-        <span className={`font-bold ${
-          size === 'sm' ? 'text-lg' : 
-          size === 'md' ? 'text-xl' : 'text-2xl'
-        } text-primary`}>
+        <span className="text-xl font-bold text-foreground whitespace-nowrap">
           Adamur
         </span>
       )}

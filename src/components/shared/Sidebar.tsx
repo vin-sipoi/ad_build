@@ -47,9 +47,15 @@ export function Sidebar() {
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Logo Section */}
-      <div className="flex items-center justify-center px-4 mb-8">
-        <Link href="/dashboard" className="flex items-center">
-          <Logo size="sm" showText={false} />
+      <div className={cn(
+        "flex items-center mb-8 h-12",
+        isExpanded ? "px-4 justify-start" : "px-4 justify-center"
+      )}>
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Logo 
+            variant="dark"
+            showText={isExpanded}
+          />
         </Link>
       </div>
 

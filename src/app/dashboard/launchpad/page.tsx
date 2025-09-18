@@ -9,8 +9,8 @@ export default function LaunchpadPage() {
   return (
     <div className="space-y-8">
       <div className="text-center py-12">
-        <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Lock className="h-10 w-10 text-purple-500" />
+        <div className="w-20 h-20 bg-gray-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Lock className="h-10 w-10 text-gray-500" />
         </div>
         <h1 className="text-4xl font-bold mb-4">Launchpad Stage</h1>
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">

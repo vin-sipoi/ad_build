@@ -1,174 +1,139 @@
-// Dynamic page for a single course
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Course } from '@/types';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { PlayCircle } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { Course } from '@/types/academy';
+import { TopicRoadmap } from '@/components/academy/TopicRoadmap';
+import { TopicModal } from '@/components/academy/TopicModal';
+import { ArrowLeft, BookOpen, Clock, Users } from 'lucide-react';
 
-export default function CoursePage({ params }: { params: { courseId: string } }) {
+export default function CourseDetailPage() {
+  const params = useParams();
+  const router = useRouter();
   const [course, setCourse] = useState<Course | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`/api/courses/${params.courseId}`);
-        if (!response.ok) {
-          notFound();
+        const response = await fetch(`/api/courses`);
+        if (response.ok) {
+          const courses: Course[] = await response.json();
+          const found = courses.find(c => c.id === params.courseId || c._id === params.courseId);
+          setCourse(found || null);
+        } else {
+          console.error('Failed to load courses list');
         }
-        const data = await response.json();
-        setCourse(data);
       } catch (error) {
-        console.error('Error fetching course:', error);
-        notFound();
+        console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourse();
+    if (params.courseId) {
+      fetchCourse();
+    }
   }, [params.courseId]);
+
+  const handleTopicClick = (topicId: string) => {
+    setSelectedTopicId(topicId);
+  };
+
+  const handleStartTopic = (topicId: string) => {
+    router.push(`/dashboard/academy/${params.courseId}/topics/${topicId}`);
+  };
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div className="h-64 bg-card animate-pulse rounded-lg" />
-        <div className="h-12 bg-card animate-pulse rounded-lg" />
-        <div className="h-48 bg-card animate-pulse rounded-lg" />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (!course) {
-    return notFound();
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Course not found</h1>
+        <button 
+          onClick={() => router.push('/dashboard/academy')}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Back to Academy
+        </button>
+      </div>
+    );
   }
 
+  const selectedTopic = course.modules
+    .flatMap(module => module.topics)
+    .find(topic => topic.id === selectedTopicId);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Course Header */}
-      <div className="relative h-64 rounded-lg overflow-hidden mb-8">
-        <Image
-          src={course.thumbnail || '/course-placeholder.svg'}
-          alt={course.title}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-1 bg-primary text-white text-xs rounded-full">
-              Residency Module
-            </span>
-            <span className="px-2 py-1 bg-white/20 text-white text-xs rounded-full">
-              +{course.creditsReward} Credits
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
+      {/* Header */}
+      <div className="border-b border-gray-800 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => router.push('/dashboard/academy')}
+              className="flex items-center gap-2 text-gray-300 hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Academy
+            </button>
           </div>
-          <h1 className="text-4xl font-bold text-white">{course.title}</h1>
-          <p className="text-lg text-white/80">{course.description}</p>
+          
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
+              <p className="text-gray-300 text-lg mb-4">{course.description}</p>
+              
+              <div className="flex items-center gap-6 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{course.estimatedHours ?? course.duration} hours</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  <span>{course.modules.reduce((acc, module) => acc + module.topics.length, 0)} topics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="capitalize">{course.difficulty}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Course Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Course Modules</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {course.modules.map((module) => (
-                  <AccordionItem key={module.id} value={`item-${module.id}`}>
-                    <AccordionTrigger className="font-semibold">
-                      {module.title}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <ul className="space-y-2">
-                        {module.lessons.map((lesson) => (
-                          <li key={lesson.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
-                            <div className="flex items-center gap-3">
-                              <PlayCircle className="h-5 w-5 text-muted-foreground" />
-                              <span>{lesson.title}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {lesson.duration}m
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-2">Learning Path</h2>
+          <p className="text-gray-400">
+            Follow the roadmap below to master {course.title.toLowerCase()}. Click on any topic to get started.
+          </p>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {course.creditsRequired > 0 ? (
-            <div className="space-y-2">
-              <Button className="w-full text-lg py-6" disabled>
-                Requires {course.creditsRequired} Credits
-              </Button>
-              <p className="text-xs text-muted-foreground text-center">
-                Complete previous modules to unlock
-              </p>
-            </div>
-          ) : (
-            <Button className="w-full text-lg py-6">Start Learning</Button>
-          )}
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Module Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span>Modules:</span>
-                <span className="font-semibold">{course.modules.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Duration:</span>
-                <span className="font-semibold">{course.estimatedHours}h</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Credits Reward:</span>
-                <span className="font-semibold text-primary">+{course.creditsReward}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Level:</span>
-                <span className="font-semibold capitalize">{course.difficulty}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Prerequisites:</span>
-                <span className="font-semibold">
-                  {course.creditsRequired > 0 ? `${course.creditsRequired} credits` : 'None'}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">What You&apos;ll Learn</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1 list-disc list-inside">
-                <li>Core entrepreneurial concepts</li>
-                <li>Practical frameworks and tools</li>
-                <li>Real-world case studies</li>
-                <li>Interactive exercises</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Topics Roadmap */}
+        <TopicRoadmap 
+          course={course} 
+          onTopicClick={handleTopicClick}
+        />
       </div>
+
+      {/* Topic Detail Modal */}
+      {selectedTopic && (
+        <TopicModal
+          topic={selectedTopic}
+          onClose={() => setSelectedTopicId(null)}
+          onStart={() => handleStartTopic(selectedTopic.id)}
+        />
+      )}
     </div>
   );
 }

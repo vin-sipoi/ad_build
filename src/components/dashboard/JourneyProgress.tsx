@@ -35,7 +35,7 @@ const journeyStages = [
     subtitle: 'Pitch',
     description: 'Investor readiness, pitch coaching, Demo Day',
     icon: Rocket,
-    color: 'bg-purple-500',
+    color: 'bg-gray-500',
     status: 'locked',
     progress: 0,
   },
@@ -111,7 +111,9 @@ export function JourneyProgress() {
               </Card>
               
               {index < journeyStages.length - 1 && (
-                <ArrowRight className="hidden md:block absolute top-1/2 -right-2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <div className="hidden md:flex absolute top-1/2 -right-5 transform -translate-y-1/2 w-10 h-10 bg-background rounded-full items-center justify-center z-10">
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </div>
               )}
             </div>
           ))}
