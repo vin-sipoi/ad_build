@@ -5,7 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { Course, Topic } from '@/types/academy';
 import { TopicRoadmap } from '@/components/academy/TopicRoadmap';
 import { TopicContentModal } from '@/components/academy/TopicContentModal';
-import { ArrowLeft } from 'lucide-react';
+import { Clock, Award } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -78,8 +81,41 @@ export default function CourseDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Course Summary Card */}
+      <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <Image
+              src={course.thumbnail}
+              alt={course.title}
+              width={64}
+              height={64}
+              className="rounded-lg object-cover"
+            />
+            <div className="flex-1">
+              <h2 className="font-semibold text-lg mb-2">{course.title}</h2>
+              <p className="text-muted-foreground mb-4 line-clamp-2">
+                {course.description}
+              </p>
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{course.duration}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Award className="h-4 w-4 text-primary" />
+                  <span>Earn {course.creditsReward} credits</span>
+                </div>
+                <Badge variant="secondary">{course.difficulty}</Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Learning Path */}
       <div className="relative">
+        <h3 className="text-xl font-semibold mb-8 text-center">Learning Path</h3>
         <TopicRoadmap 
           course={course} 
           onTopicClick={handleTopicClick}

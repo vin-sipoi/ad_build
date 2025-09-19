@@ -2,7 +2,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,6 +15,8 @@ import {
   MessageSquare,
   HelpCircle,
   UserCircle,
+  Menu,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -36,25 +38,58 @@ const bottomNavItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
-    <aside 
-      className={cn(
-        "flex flex-col py-6 bg-card border-r transition-all duration-300 ease-in-out group",
-        isExpanded ? "w-64" : "w-20"
+    <>
+      {/* Mobile Menu Button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="bg-background/80 backdrop-blur-sm"
+        >
+          {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
       )}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-    >
+
+      {/* Sidebar */}
+      <aside 
+        className={cn(
+          "flex flex-col py-6 bg-card border-r transition-all duration-300 ease-in-out group",
+          // Desktop behavior
+          "hidden md:flex md:h-screen md:sticky md:top-0",
+          isExpanded ? "w-64" : "w-20",
+          // Mobile behavior
+          "fixed top-0 left-0 h-screen z-50",
+          isMobileMenuOpen ? "flex w-64" : "hidden md:flex"
+        )}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
       {/* Logo Section */}
       <div className={cn(
         "flex items-center mb-8 h-12",
-        isExpanded ? "px-4 justify-start" : "px-4 justify-center"
+        isExpanded || isMobileMenuOpen ? "px-4 justify-start" : "px-4 justify-center"
       )}>
         <Link href="/dashboard" className="flex items-center gap-2">
           <Logo 
             variant="dark"
-            showText={isExpanded}
+            showText={isExpanded || isMobileMenuOpen}
           />
         </Link>
       </div>
@@ -68,7 +103,7 @@ export function Sidebar() {
               variant="ghost"
               className={cn(
                 "transition-all duration-200 flex items-center",
-                isExpanded 
+                (isExpanded || isMobileMenuOpen)
                   ? "w-full h-12 justify-start gap-3 px-4" 
                   : "w-12 h-12 justify-center p-0",
                 pathname === item.href && 'bg-primary/10 text-primary'
@@ -76,7 +111,7 @@ export function Sidebar() {
             >
               <Link href={item.href} className="flex items-center gap-3">
                 <item.icon className="h-5 w-5 shrink-0" />
-                {isExpanded && (
+                {(isExpanded || isMobileMenuOpen) && (
                   <span className="text-sm font-medium whitespace-nowrap">
                     {item.label}
                   </span>
@@ -85,7 +120,7 @@ export function Sidebar() {
             </Button>
             
             {/* Tooltip for collapsed state */}
-            {!isExpanded && (
+            {!isExpanded && !isMobileMenuOpen && (
               <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
                 {item.label}
               </div>
@@ -103,7 +138,7 @@ export function Sidebar() {
               variant="ghost"
               className={cn(
                 "transition-all duration-200 flex items-center",
-                isExpanded 
+                (isExpanded || isMobileMenuOpen)
                   ? "w-full h-12 justify-start gap-3 px-4" 
                   : "w-12 h-12 justify-center p-0",
                 pathname === item.href && 'bg-primary/10 text-primary'
@@ -111,7 +146,7 @@ export function Sidebar() {
             >
               <Link href={item.href} className="flex items-center gap-3">
                 <item.icon className="h-5 w-5 shrink-0" />
-                {isExpanded && (
+                {(isExpanded || isMobileMenuOpen) && (
                   <span className="text-sm font-medium whitespace-nowrap">
                     {item.label}
                   </span>
@@ -120,7 +155,7 @@ export function Sidebar() {
             </Button>
             
             {/* Tooltip for collapsed state */}
-            {!isExpanded && (
+            {!isExpanded && !isMobileMenuOpen && (
               <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
                 {item.label}
               </div>
@@ -131,13 +166,13 @@ export function Sidebar() {
         {/* User Avatar */}
         <div className={cn(
           "flex items-center pt-4 transition-all duration-200 w-full",
-          isExpanded ? "gap-3 px-4 justify-start" : "justify-center"
+          (isExpanded || isMobileMenuOpen) ? "gap-3 px-4 justify-start" : "justify-center"
         )}>
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          {isExpanded && (
+          {(isExpanded || isMobileMenuOpen) && (
             <div className="flex flex-col opacity-100 animate-in fade-in slide-in-from-left-2 duration-200">
               <span className="text-sm font-medium">Founder</span>
               <span className="text-xs text-muted-foreground">Academy Member</span>
@@ -146,5 +181,6 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
