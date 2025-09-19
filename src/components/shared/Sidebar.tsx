@@ -3,7 +3,6 @@
 
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -81,19 +80,6 @@ export function Sidebar() {
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
       >
-      {/* Logo Section */}
-      <div className={cn(
-        "flex items-center mb-8 h-12",
-        isExpanded || isMobileMenuOpen ? "px-4 justify-start" : "px-4 justify-center"
-      )}>
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Logo 
-            variant="dark"
-            showText={isExpanded || isMobileMenuOpen}
-          />
-        </Link>
-      </div>
-
       {/* Main Navigation */}
       <nav className="flex-1 flex flex-col items-center space-y-2 px-2">
         {navItems.map((item) => (

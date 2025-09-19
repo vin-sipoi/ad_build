@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { CourseCard } from './CourseCard';
 import { Course } from '@/types/academy';
@@ -12,8 +12,9 @@ export function CourseList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [selectedTrack, setSelectedTrack] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
 
 
   useEffect(() => {
@@ -30,12 +31,16 @@ export function CourseList() {
       );
     }
 
-    if (selectedDifficulty) {
-      filtered = filtered.filter(course => course.difficulty === selectedDifficulty);
+    if (selectedTrack) {
+      // Filter by track - you can modify this logic based on how tracks are stored in your course data
+      filtered = filtered.filter(course => 
+        course.title.toLowerCase().includes(selectedTrack.toLowerCase()) ||
+        course.description.toLowerCase().includes(selectedTrack.toLowerCase())
+      );
     }
 
     setFilteredCourses(filtered);
-  }, [courses, searchTerm, selectedDifficulty]);
+  }, [courses, searchTerm, selectedTrack]);
 
   const fetchCourses = async () => {
     try {
@@ -53,13 +58,22 @@ export function CourseList() {
 
 
 
-  const difficulties = ['Beginner', 'Intermediate', 'Advanced'];
+  const tracks = ['DeFi', 'Smart Contracts', 'AI', 'Web3', 'NFTs', 'GameFi'];
 
   if (loading) {
     return (
       <div className="space-y-6">
         {/* Search skeleton */}
-        <div className="h-10 bg-muted animate-pulse rounded-md" />
+        <div className="w-full max-w-md mx-auto sm:mx-0">
+          <div className="h-10 bg-muted animate-pulse rounded-md" />
+        </div>
+        
+        {/* Filter skeleton */}
+        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="h-8 w-20 bg-muted animate-pulse rounded-full" />
+          ))}
+        </div>
         
         {/* Grid skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -73,37 +87,36 @@ export function CourseList() {
 
   return (
     <div className="space-y-6">
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search courses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <div className="flex gap-2 flex-wrap">
+      {/* Search Bar */}
+      <div className="relative w-full max-w-md mx-auto sm:mx-0">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search courses..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 w-full"
+        />
+      </div>
+
+      {/* Track Filter */}
+      <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+        <Badge
+          variant={selectedTrack === '' ? 'default' : 'secondary'}
+          className="cursor-pointer"
+          onClick={() => setSelectedTrack('')}
+        >
+          All Tracks
+        </Badge>
+        {tracks.map((track) => (
           <Badge
-            variant={selectedDifficulty === '' ? 'default' : 'secondary'}
+            key={track}
+            variant={selectedTrack === track ? 'default' : 'secondary'}
             className="cursor-pointer"
-            onClick={() => setSelectedDifficulty('')}
+            onClick={() => setSelectedTrack(track)}
           >
-            All Levels
+            {track}
           </Badge>
-          {difficulties.map((difficulty) => (
-            <Badge
-              key={difficulty}
-              variant={selectedDifficulty === difficulty ? 'default' : 'secondary'}
-              className="cursor-pointer"
-              onClick={() => setSelectedDifficulty(difficulty)}
-            >
-              {difficulty}
-            </Badge>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Course Grid */}

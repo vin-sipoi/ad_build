@@ -2,11 +2,10 @@
 'use client';
 
 import { CourseList } from '@/components/academy/CourseList';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Search, GraduationCap, Trophy, Clock } from 'lucide-react';
+import { GraduationCap, Trophy, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ResidencyPage() {
@@ -21,13 +20,6 @@ export default function ResidencyPage() {
           <p className="text-muted-foreground mt-2">
             Master the fundamentals through bite-sized modules and earn your way to the Lab
           </p>
-        </div>
-        <div className="relative w-80">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search modules and lessons"
-            className="pl-10 bg-card border-border"
-          />
         </div>
       </div>
 

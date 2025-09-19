@@ -1,10 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Clock, Award, BookOpen, ArrowRightLeft, Coins, ShieldCheck, Code, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Play, BookOpen, ArrowRightLeft, Coins, ShieldCheck, Code, ArrowRight, Award } from 'lucide-react';
 import { Course, Topic } from '@/types/academy';
 
 interface TopicRoadmapProps {
@@ -67,13 +64,13 @@ function TopicNode({ topic, isCompleted, isLocked, onTopicClick }: TopicNodeProp
   return (
     <div
       onClick={() => !isLocked && onTopicClick(topic.id)}
-      className={`flex items-center p-4 rounded-lg border transition-all duration-300 group ${getColors()} ${!isLocked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+      className={`w-full flex items-center p-4 rounded-lg border transition-all duration-300 group ${getColors()} ${!isLocked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
     >
-      <div className="flex-1">
-        <h3 className="font-semibold text-white">{topic.title}</h3>
-        <p className="text-sm opacity-80">{topic.description}</p>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-white truncate">{topic.title}</h3>
+        <p className="text-sm opacity-80 line-clamp-2">{topic.description}</p>
       </div>
-      <div className="flex items-center gap-4 ml-4">
+      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
         <div className={`p-2 rounded-full ${iconColor()}`}>
           {getTopicIcon(topic)}
         </div>
@@ -150,43 +147,11 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
         </div>
       </div>
 
-      {/* Course Overview */}
+      {/* Topics Roadmap */}
       <div className="container mx-auto px-4 py-8">
-        <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <Image 
-                src={course.thumbnail} 
-                alt={course.title}
-                width={64}
-                height={64}
-                className="rounded-lg object-cover"
-              />
-              <div className="flex-1">
-                <h2 className="font-semibold text-lg mb-2">{course.title}</h2>
-                <p className="text-muted-foreground mb-4 line-clamp-2">{course.description}</p>
-                <div className="flex items-center gap-6 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{course.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Award className="h-4 w-4 text-primary" />
-                    <span>Earn {course.creditReward} credits</span>
-                  </div>
-                  <Badge variant="secondary">{course.difficulty}</Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Topics Roadmap */}
         {topics.length > 0 && (
           <div className="relative">
-            <h3 className="text-xl font-semibold mb-8 text-center">Learning Path</h3>
-            
-            <div className="space-y-4">
+            <div className="w-full space-y-4">
               {topics.map((topic, index) => (
                 <TopicNode
                   key={topic.id}
