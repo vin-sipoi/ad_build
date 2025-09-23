@@ -13,7 +13,7 @@ interface AdminHeaderProps {
     name: string;
     admin: boolean;
     superAdmin: boolean;
-  };
+  } | null;
 }
 
 export function AdminHeader({ user }: AdminHeaderProps) {
@@ -44,42 +44,44 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 lg:px-8">
+        <div className="flex justify-between items-center py-3 md:py-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white truncate">
               Admin Panel
             </h1>
             {user && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">
                 Welcome, {user.name}
                 {user.superAdmin && (
-                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                  <span className="ml-1 md:ml-2 inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                     Super Admin
                   </span>
                 )}
                 {user.admin && !user.superAdmin && (
-                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  <span className="ml-1 md:ml-2 inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                     Admin
                   </span>
                 )}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 ml-4">
             {user && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <User className="h-4 w-4" />
-                {user.email}
+              <div className="hidden sm:flex items-center gap-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                <User className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="truncate max-w-[120px] md:max-w-none">{user.email}</span>
               </div>
             )}
             <Button 
               variant="outline" 
+              size="sm"
               onClick={handleLogout}
               disabled={isLoggingOut}
+              className="text-xs md:text-sm"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
+              <LogOut className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+              <span className="hidden md:inline">{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
             </Button>
           </div>
         </div>

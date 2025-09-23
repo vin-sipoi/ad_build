@@ -89,9 +89,9 @@ export function Sidebar() {
           variant="outline"
           size="sm"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-background/80 backdrop-blur-sm"
+          className="bg-background/80 backdrop-blur-sm touch-manipulation min-h-[44px] min-w-[44px] p-2"
         >
-          {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
@@ -125,14 +125,14 @@ export function Sidebar() {
                 asChild
                 variant="ghost"
                 className={cn(
-                  "transition-all duration-200 flex items-center",
+                  "transition-all duration-200 flex items-center touch-manipulation",
                   (isExpanded || isMobileMenuOpen)
-                    ? "w-full h-12 justify-start gap-3 px-4"
-                    : "w-12 h-12 justify-center p-0",
+                    ? "w-full h-12 justify-start gap-3 px-4 min-h-[48px]"
+                    : "w-12 h-12 justify-center p-0 min-h-[48px]",
                   pathname === item.href && 'bg-primary/10 text-primary'
                 )}
               >
-                <Link href={item.href} className="flex items-center gap-3">
+                <Link href={item.href} className="flex items-center gap-3 w-full">
                   <item.icon className="h-5 w-5 shrink-0" />
                   {(isExpanded || isMobileMenuOpen) && (
                     <span className="text-sm font-medium whitespace-nowrap">
@@ -160,14 +160,14 @@ export function Sidebar() {
                 asChild
                 variant="ghost"
                 className={cn(
-                  "transition-all duration-200 flex items-center",
+                  "transition-all duration-200 flex items-center touch-manipulation",
                   (isExpanded || isMobileMenuOpen)
-                    ? "w-full h-12 justify-start gap-3 px-4"
-                    : "w-12 h-12 justify-center p-0",
+                    ? "w-full h-12 justify-start gap-3 px-4 min-h-[48px]"
+                    : "w-12 h-12 justify-center p-0 min-h-[48px]",
                   pathname === item.href && 'bg-primary/10 text-primary'
                 )}
               >
-                <Link href={item.href} className="flex items-center gap-3">
+                <Link href={item.href} className="flex items-center gap-3 w-full">
                   <item.icon className="h-5 w-5 shrink-0" />
                   {(isExpanded || isMobileMenuOpen) && (
                     <span className="text-sm font-medium whitespace-nowrap">
@@ -213,7 +213,7 @@ export function Sidebar() {
               <Button
                 onClick={handleLogout}
                 variant="ghost"
-                className="w-full h-10 justify-start gap-3 px-4 text-muted-foreground hover:text-foreground"
+                className="w-full h-10 justify-start gap-3 px-4 text-muted-foreground hover:text-foreground touch-manipulation min-h-[44px]"
               >
                 <LogOut className="h-4 w-4 shrink-0" />
                 <span className="text-sm">Sign Out</span>

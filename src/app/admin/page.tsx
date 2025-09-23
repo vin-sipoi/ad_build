@@ -26,18 +26,18 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
-          <Card key={index}>
+          <Card key={index} className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <div className={stat.color}>{stat.icon}</div>
+              <CardTitle className="text-xs md:text-sm font-medium leading-tight">{stat.title}</CardTitle>
+              <div className={`${stat.color} flex-shrink-0`}>{stat.icon}</div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="text-lg md:text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-muted-foreground flex items-center">
-                <ArrowUpRight className="h-4 w-4 text-green-500" />
+                <ArrowUpRight className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
                 +2.5% from last month
               </p>
             </CardContent>
@@ -45,44 +45,48 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Quick Links</CardTitle>
+            <CardTitle className="text-base md:text-lg">Quick Links</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             {quickLinks.map((link, index) => (
-              <Link key={index} href={link.href} className="flex items-center space-x-3 p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
-                {link.icon}
-                <span className="font-medium">{link.title}</span>
+              <Link 
+                key={index} 
+                href={link.href} 
+                className="flex items-center space-x-3 p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors touch-manipulation"
+              >
+                <span className="flex-shrink-0">{link.icon}</span>
+                <span className="font-medium text-sm md:text-base">{link.title}</span>
               </Link>
             ))}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="text-base md:text-lg">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4">
-              <li className="flex items-center space-x-3">
-                <Users className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm font-medium">New user &apos;John Doe&apos; registered.</p>
+            <ul className="space-y-3 md:space-y-4">
+              <li className="flex items-start space-x-3">
+                <Users className="h-4 w-4 md:h-5 md:w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs md:text-sm font-medium">New user &apos;John Doe&apos; registered.</p>
                   <p className="text-xs text-muted-foreground">2 minutes ago</p>
                 </div>
               </li>
-              <li className="flex items-center space-x-3">
-                <BookOpen className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm font-medium">Course &apos;Next.js Advanced&apos; updated.</p>
+              <li className="flex items-start space-x-3">
+                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs md:text-sm font-medium">Course &apos;Next.js Advanced&apos; updated.</p>
                   <p className="text-xs text-muted-foreground">1 hour ago</p>
                 </div>
               </li>
-              <li className="flex items-center space-x-3">
-                <ShieldCheck className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm font-medium">New mentor application from &apos;Jane Smith&apos;.</p>
+              <li className="flex items-start space-x-3">
+                <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs md:text-sm font-medium">New mentor application from &apos;Jane Smith&apos;.</p>
                   <p className="text-xs text-muted-foreground">3 hours ago</p>
                 </div>
               </li>

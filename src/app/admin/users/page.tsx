@@ -44,10 +44,10 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Users</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-xl md:text-2xl font-bold">Users</h1>
         <Link href="/admin/users/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -55,8 +55,8 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search users..."
@@ -65,7 +65,7 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
           />
         </div>
         <Select defaultValue={role || "all"}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
@@ -77,8 +77,8 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
         </Select>
       </div>
 
-      {/* Users Table */}
-      <div className="border rounded-lg">
+      {/* Users Table - Desktop */}
+      <div className="hidden md:block border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -125,6 +125,42 @@ const UsersPage = async ({ searchParams }: UsersPageProps) => {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Users Cards - Mobile */}
+      <div className="md:hidden space-y-4">
+        {users.map((user: IUser & { totalTransactions?: number }) => (
+          <div key={user._id} className="border rounded-lg p-4 space-y-3">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-medium text-lg">{user.name}</h3>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              </div>
+              <UserActionsDropdown userId={user._id} />
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant="outline" className="font-mono text-xs">
+                {user.profile?.credits || 0} credits
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {user.totalTransactions || 0} transactions
+              </Badge>
+            </div>
+            
+            <div className="flex gap-1 flex-wrap">
+              {user.roles.map((role) => (
+                <Badge key={role} variant="secondary" className="text-xs">
+                  {role}
+                </Badge>
+              ))}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              Created: {new Date(user.createdAt || '').toLocaleDateString()}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Pagination */}

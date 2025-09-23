@@ -37,14 +37,14 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="w-full max-w-md p-6 md:p-8 space-y-6 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <Image src="/Adamur_White_BG.png" alt="Adamur Logo" width={100} height={100} className="mx-auto mb-4" style={{ width: "auto", height: "auto" }} />
-          <p className="text-lg font-medium text-gray-700">Adamur Builder Residency & Engineering Lab</p>
-          <p className="text-sm text-gray-500 mb-4">Virtual Accelerator (AI + Web3 Infra)</p>
-          <h1 className="text-3xl font-bold">Sign In</h1>
-          <p className="text-gray-500">Access your dashboard</p>
+          <p className="text-base md:text-lg font-medium text-gray-700 leading-tight">Adamur Builder Residency & Engineering Lab</p>
+          <p className="text-xs md:text-sm text-gray-500 mb-4">Virtual Accelerator (AI + Web3 Infra)</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Sign In</h1>
+          <p className="text-gray-500 text-sm md:text-base">Access your dashboard</p>
         </div>
         {error && <p className="text-red-500 text-center">{error}</p>}
         <form onSubmit={handleSignIn} className="space-y-6">
