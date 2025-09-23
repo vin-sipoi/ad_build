@@ -44,9 +44,9 @@ export async function GET() {
     
     // Fallback to static data if database fails
     try {
-      const { courses } = require('@/data/courses');
-      return NextResponse.json(courses);
-    } catch (fallbackError) {
+      const coursesModule = await import('@/data/courses');
+      return NextResponse.json(coursesModule.courses);
+    } catch {
       return NextResponse.json(
         { error: 'Failed to fetch courses' },
         { status: 500 }

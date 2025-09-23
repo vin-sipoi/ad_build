@@ -50,8 +50,8 @@ export async function GET(
     
     // Fallback to static data if database fails
     try {
-      const { courses } = require('@/data/courses');
-      const course = courses.find((c: any) => c.id === courseId);
+      const coursesModule = await import('@/data/courses');
+      const course = coursesModule.courses.find((c: { id: string }) => c.id === courseId);
       if (course) {
         return NextResponse.json(course);
       }

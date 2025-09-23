@@ -20,6 +20,23 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    files: ["**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+        }
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

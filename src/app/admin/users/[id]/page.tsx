@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import { ArrowLeft, CreditCard, Edit, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type UserDetailsPageProps = {
   params: Promise<{
@@ -190,9 +191,11 @@ const UserDetailsPage = async ({ params }: UserDetailsPageProps) => {
               <label className="text-sm font-medium text-gray-600">Avatar</label>
               <p className="text-sm">
                 {user.profile?.avatarUrl ? (
-                  <img 
+                  <Image 
                     src={user.profile.avatarUrl} 
                     alt="Avatar" 
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full"
                   />
                 ) : (
