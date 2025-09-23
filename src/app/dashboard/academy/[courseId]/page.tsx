@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Course, Topic } from '@/types/academy';
 import { TopicRoadmap } from '@/components/academy/TopicRoadmap';
 import { TopicContentModal } from '@/components/academy/TopicContentModal';
-import { ArrowLeft } from 'lucide-react';
+
 
 export default function CourseDetailPage() {
   const params = useParams();

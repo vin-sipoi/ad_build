@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Play, CheckCircle, Clock } from 'lucide-react';
-import { Topic, Subtopic } from '@/types/academy';
+import { Topic } from '@/types/academy';
 
 interface TopicContentModalProps {
   isOpen: boolean;
