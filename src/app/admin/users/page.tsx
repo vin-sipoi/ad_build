@@ -18,6 +18,7 @@ import { UserActionsDropdown } from './UserActionsDropdown';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IUser } from '../types';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 type UsersPageProps = {
   searchParams: Promise<{
@@ -28,6 +29,9 @@ type UsersPageProps = {
 };
 
 const UsersPage = async ({ searchParams }: UsersPageProps) => {
+  // Require admin authentication
+  await requireAdminAuth();
+  
   const params = await searchParams;
   const page = params.page ? parseInt(params.page) : 1;
   const search = params.search || '';

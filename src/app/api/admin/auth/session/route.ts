@@ -37,16 +37,24 @@ export async function POST(request: NextRequest) {
 
     const cookieStore = await cookies();
     
-    // Set the session cookie
-    cookieStore.set('admin-session', sessionCookie, {
+    // Set the session cookie both ways
+    console.log(`🍪 Setting admin session cookie, length: ${sessionCookie.length}`);
+    
+    // Use more permissive cookie settings for development
+    const cookieOptions = {
       maxAge: expiresIn / 1000, // maxAge is in seconds
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      httpOnly: false, // Allow JavaScript access for debugging
+      secure: false, // Force false for localhost
+      sameSite: 'lax' as const,
       path: '/',
-    });
+    };
+    
+    cookieStore.set('admin-session', sessionCookie, cookieOptions);
+    
+    console.log(`🍪 Cookie set successfully, httpOnly: false, secure: false`);
 
-    return NextResponse.json({
+    // Create response
+    const response = NextResponse.json({
       message: 'Session created successfully',
       user: {
         uid: decodedToken.uid,
@@ -56,6 +64,17 @@ export async function POST(request: NextRequest) {
         superAdmin: decodedToken.superAdmin,
       },
     });
+    
+    // ALSO set cookie via response headers as primary method
+    response.cookies.set('admin-session', sessionCookie, {
+      maxAge: cookieOptions.maxAge,
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+    });
+    
+    return response;
   } catch (error: unknown) {
     console.error('Session creation error:', error);
     const firebaseError = error as { code?: string };

@@ -49,22 +49,30 @@ export async function dbConnect(): Promise<typeof mongoose> {
   }
 
   if (!cached.promise) {
+    console.log('🔄 Attempting MongoDB connection to:', MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+    
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000, // 5 second timeout instead of 30
-      socketTimeoutMS: 10000, // 10 second socket timeout
-      connectTimeoutMS: 10000, // 10 second connection timeout
+      serverSelectionTimeoutMS: 30000, // Increased to 30 seconds
+      socketTimeoutMS: 30000, // Increased to 30 seconds
+      connectTimeoutMS: 30000, // Increased to 30 seconds
+      maxPoolSize: 10,
+      retryWrites: true
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then(async (mongoose) => {
-      console.log('Connected to MongoDB');
+      console.log('✅ Successfully connected to MongoDB Atlas');
       
       // Seed admin user if it doesn't exist
       await seedAdminUser();
       
       return mongoose;
     }).catch((error) => {
-      console.error('MongoDB connection failed:', error.message);
+      console.error('❌ MongoDB connection failed:');
+      console.error('   Error type:', error.constructor.name);
+      console.error('   Error message:', error.message);
+      console.error('   Error code:', error.code);
+      console.error('   Full error:', error);
       cached.promise = null; // Reset promise so it can retry
       throw error;
     });

@@ -104,7 +104,19 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={async () => {
+                      try {
+                        await fetch('/api/admin/auth/logout', { method: 'POST' });
+                        window.location.href = '/admin/login';
+                      } catch (error) {
+                        console.error('Logout failed:', error);
+                      }
+                    }}
+                    className="cursor-pointer"
+                  >
+                    Logout
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

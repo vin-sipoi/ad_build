@@ -11,28 +11,89 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
+    
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if user has admin claims
+      const idTokenResult = await userCredential.user.getIdTokenResult(true);
+      const isAdmin = !!idTokenResult.claims.admin;
+      
+      if (isAdmin) {
+        // For admin users, create admin session
+        const idToken = await userCredential.user.getIdToken();
+        
+        const response = await fetch('/api/admin/auth/session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ idToken }),
+        });
+
+        if (response.ok) {
+          // Redirect to admin panel
+          router.push('/admin');
+        } else {
+          const data = await response.json();
+          setError(data.message || 'Admin access denied');
+        }
+      } else {
+        // Regular users go to dashboard
+        router.push('/dashboard');
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSocialSignIn = async (provider: 'google' | 'github') => {
     const authProvider = provider === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
+    setLoading(true);
+    
     try {
-      await signInWithPopup(auth, authProvider);
-      // Here you would typically handle the user creation in your own database
-      // For now, we just redirect to the dashboard
-      router.push('/dashboard');
+      const userCredential = await signInWithPopup(auth, authProvider);
+      
+      // Check if user has admin claims
+      const idTokenResult = await userCredential.user.getIdTokenResult(true);
+      const isAdmin = !!idTokenResult.claims.admin;
+      
+      if (isAdmin) {
+        // For admin users, create admin session
+        const idToken = await userCredential.user.getIdToken();
+        
+        const response = await fetch('/api/admin/auth/session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ idToken }),
+        });
+
+        if (response.ok) {
+          // Redirect to admin panel
+          router.push('/admin');
+        } else {
+          const data = await response.json();
+          setError(data.message || 'Admin access denied');
+        }
+      } else {
+        // Regular users go to dashboard
+        router.push('/dashboard');
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,9 +141,10 @@ export default function SignIn() {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={loading}
+              className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </div>
         </form>
@@ -97,15 +159,17 @@ export default function SignIn() {
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => handleSocialSignIn('google')}
-            className="w-full px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+            disabled={loading}
+            className="w-full px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Google
+            {loading ? 'Loading...' : 'Google'}
           </button>
           <button
             onClick={() => handleSocialSignIn('github')}
-            className="w-full px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+            disabled={loading}
+            className="w-full px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            GitHub
+            {loading ? 'Loading...' : 'GitHub'}
           </button>
         </div>
         <p className="text-sm text-center text-gray-500">

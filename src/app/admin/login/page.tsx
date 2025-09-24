@@ -19,6 +19,43 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Temporarily disable auto-signin to test manual login
+  // Check if user is already signed in and has admin claims
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  //     if (user && !loading && !autoSigningIn) {
+  //       try {
+  //         setAutoSigningIn(true);
+  //         const idTokenResult = await user.getIdTokenResult(true);
+          
+  //         if (idTokenResult.claims.admin || idTokenResult.claims.superAdmin) {
+  //           // User is already signed in and has admin claims, create session
+  //           const idToken = await user.getIdToken();
+            
+  //           const response = await fetch('/api/admin/auth/session', {
+  //             method: 'POST',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //             },
+  //             body: JSON.stringify({ idToken }),
+  //           });
+
+  //           if (response.ok) {
+  //             router.push('/admin');
+  //             return;
+  //           }
+  //         }
+  //       } catch (error) {
+  //         console.error('Auto sign-in failed:', error);
+  //       } finally {
+  //         setAutoSigningIn(false);
+  //       }
+  //     }
+  //   });
+
+  //   return () => unsubscribe();
+  // }, [router, loading, autoSigningIn]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -43,9 +80,11 @@ export default function AdminLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to admin dashboard
-        router.push('/admin');
-        router.refresh();
+        // Wait a bit for cookie to be set, then redirect
+        setTimeout(() => {
+          router.push('/admin');
+          router.refresh();
+        }, 500);
       } else {
         setError(data.message || 'Login failed. Admin access required.');
       }
@@ -104,7 +143,7 @@ export default function AdminLogin() {
                     placeholder="admin@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
                     required
                     disabled={loading}
                   />
@@ -121,7 +160,7 @@ export default function AdminLogin() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
                     required
                     disabled={loading}
                   />

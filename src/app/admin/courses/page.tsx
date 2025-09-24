@@ -16,6 +16,7 @@ import { ICourse } from '../types';
 import { getCourses } from './actions';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { CourseActionsDropdown } from './CourseActionsDropdown';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 // Removed inline DeleteCourseButton - now using CourseActionsDropdown
 
@@ -28,6 +29,9 @@ type CoursesPageProps = {
 };
 
 const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
+  // Require admin authentication
+  await requireAdminAuth();
+  
   const params = await searchParams;
   const page = params.page ? parseInt(params.page) : 1;
   const search = params.search || '';
