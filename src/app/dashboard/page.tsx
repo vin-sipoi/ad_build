@@ -1,7 +1,7 @@
 'use client';
 
 import { CourseList } from '@/components/academy/CourseList';
-import { JourneyProgress } from '@/components/dashboard';
+import { DashboardOverview } from '@/components/dashboard';
 
 export default function Dashboard() {
   return (
@@ -10,10 +10,10 @@ export default function Dashboard() {
         <h1 className="text-2xl md:text-4xl font-bold leading-tight">Adamur Academy</h1>
       </div>
       
-      <JourneyProgress />
+      <DashboardOverview />
       
       <div>
-        <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4">Your Learning Path</h2>
+        <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4">Available Courses</h2>
         <CourseList />
       </div>
     </div>

@@ -3,98 +3,142 @@
 
 import { CourseList } from '@/components/academy/CourseList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { GraduationCap, Trophy, Clock } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { 
+  GraduationCap, 
+  Trophy, 
+  BookOpen, 
+  Users, 
+  Clock,
+  Target,
+  ArrowRight
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function ResidencyPage() {
-  const { userData } = useAuth();
-  
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold">Residency Program</h1>
+          <h1 className="text-4xl font-bold">Academy Residency</h1>
           <p className="text-muted-foreground mt-2">
-            Master the fundamentals through bite-sized modules and earn your way to the Lab
+            Master startup fundamentals through comprehensive modules and earn your way to the Lab
           </p>
         </div>
+        <Link href="/dashboard/my-journey">
+          <Button variant="outline">
+            View My Progress
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
-      {/* Progress Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Program Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Modules</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">25%</div>
-            <div className="mt-2">
-              <Progress value={25} className="h-2" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              2 of 6 modules completed
+            <div className="text-2xl font-bold">6+</div>
+            <p className="text-xs text-muted-foreground">
+              Comprehensive learning paths
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Credits Earned</CardTitle>
+            <CardTitle className="text-sm font-medium">Credits Available</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {userData?.credits || 0}
-            </div>
+            <div className="text-2xl font-bold text-primary">500+</div>
             <p className="text-xs text-muted-foreground">
-              +250 available from remaining modules
+              Earn credits by completing modules
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Time Invested</CardTitle>
+            <CardTitle className="text-sm font-medium">Learning Time</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">14 hrs</div>
+            <div className="text-2xl font-bold">50+ hrs</div>
             <p className="text-xs text-muted-foreground">
-              ~44 hours remaining
+              Self-paced learning content
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Community</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1000+</div>
+            <p className="text-xs text-muted-foreground">
+              Fellow entrepreneurs
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Next Milestone */}
+      {/* Program Goals */}
       <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            🎯 Next Milestone
+            <Target className="h-5 w-5" />
+            Program Goals
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">Complete Residency Program</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold mb-2">Learn Fundamentals</h3>
               <p className="text-sm text-muted-foreground">
-                Finish all 6 modules to unlock the Lab stage and earn your Admission NFT Badge
+                Master essential startup and business building skills through structured modules
               </p>
             </div>
-            <Badge variant="secondary" className="bg-primary/20 text-primary">
-              4 modules left
-            </Badge>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold mb-2">Earn Credits</h3>
+              <p className="text-sm text-muted-foreground">
+                Complete modules to earn credits and unlock advanced features
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold mb-2">Advance to Lab</h3>
+              <p className="text-sm text-muted-foreground">
+                Graduate to the Lab stage and start building with mentorship
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Course Modules */}
+      {/* Available Modules */}
       <div>
-        <h2 className="text-2xl font-semibold mb-4">Learning Modules</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">Available Learning Modules</h2>
+          <Badge variant="secondary" className="bg-primary/20 text-primary">
+            Start Learning Today
+          </Badge>
+        </div>
         <CourseList />
       </div>
     </div>

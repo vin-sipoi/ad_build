@@ -27,10 +27,11 @@ import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dashboard/residency', icon: BookOpen, label: 'Residency' },
-  { href: '/dashboard/lab', icon: BarChart2, label: 'Lab' },
-  { href: '/dashboard/launchpad', icon: Globe, label: 'Launchpad' },
-  { href: '/dashboard/alumni', icon: PlayCircle, label: 'Alumni' },
+  { href: '/dashboard/my-journey', icon: BookOpen, label: 'My Journey' },
+  { href: '/dashboard/residency', icon: BarChart2, label: 'Residency' },
+  { href: '/dashboard/lab', icon: Globe, label: 'Lab' },
+  { href: '/dashboard/launchpad', icon: PlayCircle, label: 'Launchpad' },
+  { href: '/dashboard/alumni', icon: MessageSquare, label: 'Alumni' },
 ];
 
 const bottomNavItems = [

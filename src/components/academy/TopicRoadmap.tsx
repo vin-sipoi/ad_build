@@ -120,23 +120,30 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
       {/* Header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-20">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            {/* Back button removed (handled at page level) */}
+          {/* Mobile: Stack content vertically, Desktop: Horizontal layout */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            {/* Title Section */}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold">{course.title}</h1>
-              <p className="text-muted-foreground">Learning Roadmap</p>
+              <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">{course.title}</h1>
+              <p className="text-muted-foreground text-sm">Learning Roadmap</p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
+            
+            {/* Stats Section - Responsive layout */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              {/* Progress Stats */}
+              <div className="text-left sm:text-right">
                 <div className="text-sm font-medium">{completedCount}/{topics.length} completed</div>
                 <div className="text-xs text-muted-foreground">{Math.round(progressPercentage)}% progress</div>
               </div>
-              <div className="flex items-center gap-2">
+              
+              {/* Credits Badge */}
+              <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
                 <Award className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">+{course.creditsReward ?? course.creditReward} credits</span>
+                <span className="text-sm font-medium text-primary">+{course.creditsReward ?? course.creditReward} credits</span>
               </div>
             </div>
           </div>
+          
           {/* Progress Bar */}
           <div className="w-full bg-muted rounded-full h-2 mt-4">
             <div 

@@ -5,7 +5,7 @@ import { Lesson } from "@/models/Lesson";
 import { Topic } from "@/models/Topic";
 import { ILesson } from "../types";
 import { revalidatePath } from "next/cache";
-import { mockLessons } from "@/lib/mockData";
+
 
 export async function getLessons(options: {
   page?: number;
@@ -59,36 +59,9 @@ export async function getLessons(options: {
     };
   } catch (error) {
     console.error('Error fetching lessons:', error);
-    
-    // Fallback to mock data
-    const { page = 1, limit = 10, search = '', topicId = '', type = '' } = options;
-    let filteredLessons = mockLessons;
-    
-    if (search) {
-      filteredLessons = mockLessons.filter(lesson => 
-        lesson.title.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    if (topicId && topicId !== 'all') {
-      filteredLessons = filteredLessons.filter(lesson => lesson.topicId === topicId);
-    }
-    if (type && type !== 'all') {
-      filteredLessons = filteredLessons.filter(lesson => lesson.type === type);
-    }
-    
-    const total = filteredLessons.length;
-    const skip = (page - 1) * limit;
-    const paginatedLessons = filteredLessons.slice(skip, skip + limit);
-    
     return {
-      success: true,
-      data: paginatedLessons,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      success: false,
+      error: 'Failed to fetch lessons'
     };
   }
 }
