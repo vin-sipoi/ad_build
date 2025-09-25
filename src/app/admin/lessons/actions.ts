@@ -101,7 +101,7 @@ export async function getAllTopics() {
         return { success: true, data: JSON.parse(JSON.stringify(topics)) };
     } catch (error) {
         console.error('Error fetching topics:', error);
-        return { success: true, data: mockTopics.map(t => ({ _id: t._id, title: t.title, courseId: { title: 'Mock Course' } })) };
+        return { success: false, error: 'Failed to fetch topics' };
     }
 }
 

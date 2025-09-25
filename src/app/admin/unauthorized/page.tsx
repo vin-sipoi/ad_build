@@ -22,7 +22,7 @@ export default function UnauthorizedPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Please contact your system administrator if you believe this is an error.
           </p>
-          <Link href="/admin/login">
+          <Link href="/sign-in">
             <Button variant="outline" className="w-full">
               Back to Login
             </Button>

@@ -33,7 +33,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       });
       
       // Redirect to login page
-      router.push('/admin/login');
+      router.push('/sign-in');
       router.refresh();
     } catch (error) {
       console.error('Logout error:', error);

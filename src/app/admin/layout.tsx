@@ -24,7 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AdminHeader } from '@/components/admin/AdminHeader';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,7 +36,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <AdminHeader />
       <div className="flex flex-1 relative">
         {/* Mobile Menu Button */}
         <button 
@@ -61,18 +59,20 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
         {/* Sidebar */}
         <aside 
-          className={`fixed md:relative top-0 left-0 z-50 w-64 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 transform transition-transform duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0`}
+          className={`group fixed md:relative top-0 left-0 z-50 h-screen md:h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 transform transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'
+          } md:translate-x-0 md:hover:w-64 md:w-20 lg:w-64 flex flex-col`}
         >
           <div className="p-3 md:p-4">
             <Link href="/admin" className="flex items-center space-x-2">
-              <GraduationCap className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
-              <span className="text-lg md:text-2xl font-bold text-gray-800 dark:text-white">Admin Panel</span>
+              <GraduationCap className="h-6 w-6 md:h-8 md:w-8 text-blue-600 flex-shrink-0" />
+              <span className="text-lg md:text-2xl font-bold text-gray-800 dark:text-white transition-opacity duration-300 md:group-hover:opacity-100 lg:opacity-100 md:opacity-0 whitespace-nowrap overflow-hidden">
+                Admin Panel
+              </span>
             </Link>
           </div>
-          <nav className="mt-4 md:mt-6">
-            <ul>
+          <nav className="mt-4 md:mt-6 flex-1 overflow-y-auto">
+            <ul className="space-y-1">
               <NavItem icon={<LayoutDashboard />} href="/admin">Dashboard</NavItem>
               <NavItem icon={<BookOpen />} href="/admin/courses">Courses</NavItem>
               <NavItem icon={<FileText />} href="/admin/topics">Topics</NavItem>
@@ -108,7 +108,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     onClick={async () => {
                       try {
                         await fetch('/api/admin/auth/logout', { method: 'POST' });
-                        window.location.href = '/admin/login';
+                        window.location.href = '/sign-in';
                       } catch (error) {
                         console.error('Logout failed:', error);
                       }
@@ -131,15 +131,27 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const NavItem = ({ icon, href, children }: { icon: React.ReactNode, href: string, children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+  
   return (
-    <li>
+    <li className="relative">
       <Link 
         href={href} 
-        className="flex items-center space-x-3 px-3 md:px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 touch-manipulation min-h-[48px]"
+        className={`flex items-center space-x-3 px-3 md:px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 touch-manipulation min-h-[48px] ${
+          isActive ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''
+        }`}
       >
         <span className="flex-shrink-0">{icon}</span>
-        <span className="font-medium text-sm md:text-base">{children}</span>
+        <span className="font-medium text-sm md:text-base transition-opacity duration-300 md:group-hover:opacity-100 lg:opacity-100 md:opacity-0 whitespace-nowrap overflow-hidden">
+          {children}
+        </span>
       </Link>
+      
+      {/* Tooltip for collapsed state on desktop */}
+      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg opacity-0 hover:opacity-100 pointer-events-none z-50 whitespace-nowrap transition-opacity duration-200 hidden md:block lg:hidden group-hover:hidden">
+        {children}
+      </div>
     </li>
   );
 }
