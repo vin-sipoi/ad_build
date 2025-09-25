@@ -3,7 +3,7 @@ import { dbConnect } from '@/lib/db';
 import { Course } from '@/models/Course';
 import { Topic } from '@/models/Topic';
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     await dbConnect();
 

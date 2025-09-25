@@ -5,7 +5,7 @@ import { Lesson } from "@/models/Lesson";
 import { Topic } from "@/models/Topic";
 import { ILesson } from "../types";
 import { revalidatePath } from "next/cache";
-import { mockLessons, mockTopics } from "@/lib/mockData";
+import { mockLessons } from "@/lib/mockData";
 
 export async function getLessons(options: {
   page?: number;
