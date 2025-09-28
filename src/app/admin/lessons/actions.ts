@@ -3,6 +3,7 @@
 import { dbConnect } from "@/lib/db";
 import { Lesson } from "@/models/Lesson";
 import { Topic } from "@/models/Topic";
+import { Course } from "@/models/Course";
 import { ILesson } from "../types";
 import { revalidatePath } from "next/cache";
 
@@ -68,13 +69,36 @@ export async function getLessons(options: {
 
 export async function getAllTopics() {
     try {
+        console.log('getAllTopics: Starting...');
         await dbConnect();
-        const topics = await Topic.find({}, 'title courseId')
-          .populate('courseId', 'title');
-        return { success: true, data: JSON.parse(JSON.stringify(topics)) };
+        console.log('getAllTopics: DB connected');
+        
+        // Get topics with course information
+        const topics = await Topic.find({})
+            .populate('courseId', 'title')
+            .lean(); // Use lean() for better performance and simpler objects
+        
+        console.log('getAllTopics: Topics found:', topics.length);
+        
+        if (topics.length > 0) {
+            // Convert to plain objects with string IDs
+            const serializedTopics = topics.map(topic => ({
+                _id: topic._id.toString(),
+                title: topic.title,
+                courseId: topic.courseId._id.toString(),
+                courseName: topic.courseId.title || 'Unknown Course'
+            }));
+            
+            console.log('getAllTopics: First serialized topic:', serializedTopics[0]);
+            
+            return { success: true, data: serializedTopics };
+        } else {
+            console.log('getAllTopics: No topics found in database');
+            return { success: false, error: 'No topics found in database. Please create some topics first.' };
+        }
     } catch (error) {
-        console.error('Error fetching topics:', error);
-        return { success: false, error: 'Failed to fetch topics' };
+        console.error('getAllTopics: Error fetching topics:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Failed to fetch topics' };
     }
 }
 
