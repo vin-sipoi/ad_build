@@ -3,6 +3,7 @@
 import { dbConnect } from "@/lib/db";
 import { Topic } from "@/models/Topic";
 import { Course } from "@/models/Course";
+// import { Lesson } from "@/models/Lesson";
 import { ITopic } from "../types";
 import { revalidatePath } from "next/cache";
 import { mockTopics, mockCourses } from "@/lib/mockData";
@@ -15,6 +16,7 @@ export async function getTopics(options: {
   courseId?: string;
 }) {
   try {
+    console.log('🔄 getTopics called with options:', options);
     await dbConnect();
 
     const { page = 1, limit = 10, search = '', courseId = '' } = options;
@@ -25,58 +27,33 @@ export async function getTopics(options: {
       filter.title = { $regex: search, $options: 'i' };
     }
     if (courseId && courseId !== 'all') {
-      filter.courseId = courseId;
+      filter.courseId = new mongoose.Types.ObjectId(courseId);
     }
 
-    const [topics, total] = await Promise.all([
-      Topic.aggregate([
-        { $match: filter },
-        {
-          $lookup: {
-            from: 'lessons',
-            localField: '_id',
-            foreignField: 'topicId',
-            as: 'lessons'
-          }
-        },
-        {
-          $lookup: {
-            from: 'courses',
-            localField: 'courseId',
-            foreignField: '_id',
-            as: 'courseId'
-          }
-        },
-        {
-          $addFields: {
-            lessonCount: { $size: '$lessons' },
-            courseId: { $arrayElemAt: ['$courseId', 0] }
-          }
-        },
-        { $sort: { order: 1, createdAt: -1 } },
-        { $skip: skip },
-        { $limit: limit },
-        {
-          $project: {
-            title: 1,
-            summary: 1,
-            courseId: { _id: 1, title: 1 },
-            estimatedMinutes: 1,
-            order: 1,
-            status: 1,
-            slug: 1,
-            lessonCount: 1,
-            createdAt: 1,
-            updatedAt: 1
-          }
-        }
-      ]),
-      Topic.countDocuments(filter),
-    ]);
+    console.log('🔍 Filter:', filter);
+
+    // First, let's try a simple query without aggregation
+    const topics = await Topic.find(filter)
+      .populate('courseId', 'title')
+      .sort({ order: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await Topic.countDocuments(filter);
+
+    console.log('✅ Found topics:', topics.length, 'Total:', total);
+    console.log('📝 Sample topic:', topics[0]);
+
+    // Add lesson count for each topic
+    const topicsWithLessonCount = topics.map((topic) => ({
+      ...topic,
+      lessonCount: 0 // We'll update this later when we have proper lesson management
+    }));
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(topics)),
+      data: JSON.parse(JSON.stringify(topicsWithLessonCount)),
       pagination: {
         page,
         limit,
@@ -85,19 +62,25 @@ export async function getTopics(options: {
       },
     };
   } catch (error) {
-    console.error('Error fetching topics:', error);
+    console.error('❌ Error fetching topics:', error);
 
     // Fallback to mock data
+    console.log('📦 Using mock data fallback');
     const { page = 1, limit = 10, search = '', courseId = '' } = options;
-    let filteredTopics = mockTopics;
+    let filteredTopics = mockTopics.map(topic => ({
+      ...topic,
+      courseId: { _id: topic.courseId, title: 'Mock Course' },
+      lessonCount: 0,
+      status: 'draft' as const
+    }));
 
     if (search) {
-      filteredTopics = mockTopics.filter(topic =>
+      filteredTopics = filteredTopics.filter(topic =>
         topic.title.toLowerCase().includes(search.toLowerCase())
       );
     }
     if (courseId && courseId !== 'all') {
-      filteredTopics = filteredTopics.filter(topic => topic.courseId === courseId);
+      filteredTopics = filteredTopics.filter(topic => topic.courseId._id === courseId);
     }
 
     const total = filteredTopics.length;

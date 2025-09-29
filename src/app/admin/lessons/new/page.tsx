@@ -1,11 +1,25 @@
-import { LessonForm } from "../LessonForm";
+// import { LessonForm } from "../LessonForm";
 import { getAllTopics } from "../actions";
 import Link from "next/link";
 
 const NewLessonPage = async () => {
+  console.log('🔄 NewLessonPage: Starting...');
   const topics = await getAllTopics();
+  console.log('📝 NewLessonPage: Topics received:', { 
+    topics: topics || 'null/undefined', 
+    length: topics?.length || 'N/A',
+    sample: topics?.[0] || 'No first topic'
+  });
 
-  if (!topics || topics.length === 0) {
+  console.log('🔍 NewLessonPage: Checking topics condition...', { 
+    topicsExists: !!topics,
+    topicsIsArray: Array.isArray(topics), 
+    topicsLength: topics?.length,
+    willShowNoTopicsMessage: !topics || topics.length === 0 
+  });
+
+  if (!topics || !Array.isArray(topics) || topics.length === 0) {
+    console.log('❌ NewLessonPage: Showing no topics message');
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Create New Lesson</h1>
@@ -13,6 +27,7 @@ const NewLessonPage = async () => {
           <div className="text-center py-8">
             <p className="text-red-600 mb-4">No topics found</p>
             <p className="text-sm text-muted-foreground">Please make sure you have created topics first.</p>
+            <p className="text-xs text-gray-500 mt-2">Debug: topics={JSON.stringify(topics)} length={topics?.length}</p>
             <div className="mt-4 space-x-4">
               <Link href="/admin/topics" className="text-blue-600 hover:underline">
                 Go to Topics page to create topics
@@ -28,11 +43,26 @@ const NewLessonPage = async () => {
     );
   }
 
+  console.log('✅ NewLessonPage: Rendering lesson form with topics');
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Create New Lesson</h1>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <LessonForm topics={topics} />
+        <div className="p-4">
+          <h2 className="text-lg font-semibold mb-4">Topics Available ({topics.length}):</h2>
+          <ul className="space-y-2">
+            {topics.map(topic => (
+              <li key={topic._id} className="p-2 border rounded">
+                <strong>{topic.title}</strong> - Course: {topic.courseId.title}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-gray-600">
+            ✅ Topics are loading correctly! The LessonForm component might have an error.
+          </p>
+        </div>
+        {/* <LessonForm topics={topics} /> */}
       </div>
     </div>
   );
