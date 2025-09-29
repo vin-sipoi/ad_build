@@ -82,17 +82,37 @@ export async function getAllTopics(): Promise<LessonFormTopic[]> {
         await dbConnect();
         console.log('getAllTopics: DB connected');
         
-        // Get topics with course information
+        // Get topics with course information (both draft and published for admin)
         const topics = await Topic.find({})
             .populate('courseId', 'title')
             .lean();
         
-        console.log('getAllTopics: Topics found:', topics.length);
+        console.log('getAllTopics: Raw topics found:', topics.length);
+        console.log('getAllTopics: All topics:', topics.map(t => ({ 
+            _id: t._id, 
+            title: t.title, 
+            courseId: t.courseId,
+            status: (t as Record<string, unknown>).status 
+        })));
+        
+        // Filter out topics without valid courseId
+        const validTopics = topics.filter(topic => {
+            const hasValidCourseId = topic.courseId && (topic.courseId as Record<string, unknown>)?.title;
+            if (!hasValidCourseId) {
+                console.log('getAllTopics: Filtering out topic without courseId:', { 
+                    _id: topic._id, 
+                    title: topic.title, 
+                    courseId: topic.courseId 
+                });
+            }
+            return hasValidCourseId;
+        });
+        console.log('getAllTopics: Valid topics (with courseId):', validTopics.length);
         
 
         
         // Convert to the expected format for LessonForm
-        const serializedTopics = topics.map((topic: Record<string, unknown>) => ({
+        const serializedTopics = validTopics.map((topic: Record<string, unknown>) => ({
             _id: String(topic._id),
             title: String(topic.title),
             courseId: {

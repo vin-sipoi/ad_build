@@ -26,7 +26,7 @@ export function TopicContentModal({
   const [currentSubtopicIndex, setCurrentSubtopicIndex] = useState(0);
   
   // Safe access to subtopics - fallback to lessons or empty array
-  const subtopics = topic.subtopics || (topic as unknown as { lessons?: unknown[] }).lessons || [];
+  const subtopics = topic.subtopics || (topic as unknown as { lessons?: Array<Record<string, unknown>> }).lessons || [];
   const currentSubtopic = subtopics[currentSubtopicIndex];
   const progress = subtopics.length > 0 ? ((currentSubtopicIndex + 1) / subtopics.length) * 100 : 0;
 
@@ -40,7 +40,7 @@ export function TopicContentModal({
     } else if (canGoPrevTopic) {
       const prevTopic = allTopics[currentTopicIndex - 1];
       onTopicChange(prevTopic.id);
-      const prevSubtopics = prevTopic.subtopics || (prevTopic as unknown as { lessons?: unknown[] }).lessons || [];
+      const prevSubtopics = prevTopic.subtopics || (prevTopic as unknown as { lessons?: Array<Record<string, unknown>> }).lessons || [];
       setCurrentSubtopicIndex(prevSubtopics.length - 1);
     }
   };
@@ -103,7 +103,13 @@ export function TopicContentModal({
               </div>
               
               <div className="prose prose-sm max-w-none">
-                <p>{currentSubtopic.content}</p>
+                {currentSubtopic.content ? (
+                  <div className="whitespace-pre-wrap">
+                    {currentSubtopic.content}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground italic">No content available for this lesson yet.</p>
+                )}
               </div>
 
               {/* Mock content based on type */}
@@ -148,7 +154,7 @@ export function TopicContentModal({
             </Button>
 
             <div className="flex items-center gap-2">
-              {subtopics.map((_, index) => (
+              {subtopics.map((_: unknown, index: number) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSubtopicIndex(index)}

@@ -32,8 +32,13 @@ export async function GET(
       topics.map(async (topic) => {
         const lessons = await Lesson.find({ topicId: topic._id, status: 'published' })
           .sort({ order: 1 })
-          .select('title slug description type difficulty estimatedMinutes videoUrl order status')
+          .select('title slug description type difficulty estimatedMinutes videoUrl order status content')
           .lean();
+
+        console.log(`Topic "${topic.title}" has ${lessons.length} published lessons`);
+        if (lessons.length > 0) {
+          console.log(`First lesson content sample:`, lessons[0].content);
+        }
 
         return {
           id: String(topic._id),
@@ -51,6 +56,8 @@ export async function GET(
             difficulty: lesson.difficulty,
             duration: lesson.estimatedMinutes || 0,
             videoUrl: lesson.videoUrl || null,
+            content: lesson.content?.html || (typeof lesson.content === 'string' ? lesson.content : '') || '',
+            estimatedTime: `${lesson.estimatedMinutes || 0} min`,
             isCompleted: false, // TODO: Add user progress tracking
             isLocked: false, // TODO: Add lesson progression logic
             order: lesson.order
