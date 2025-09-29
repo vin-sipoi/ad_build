@@ -1,4 +1,4 @@
-// import { LessonForm } from "../LessonForm";
+import { LessonForm } from "../LessonForm";
 import { getAllTopics } from "../actions";
 import Link from "next/link";
 
@@ -49,20 +49,7 @@ const NewLessonPage = async () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Create New Lesson</h1>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Topics Available ({topics.length}):</h2>
-          <ul className="space-y-2">
-            {topics.map(topic => (
-              <li key={topic._id} className="p-2 border rounded">
-                <strong>{topic.title}</strong> - Course: {topic.courseId.title}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-sm text-gray-600">
-            ✅ Topics are loading correctly! The LessonForm component might have an error.
-          </p>
-        </div>
-        {/* <LessonForm topics={topics} /> */}
+        <LessonForm topics={topics} />
       </div>
     </div>
   );
