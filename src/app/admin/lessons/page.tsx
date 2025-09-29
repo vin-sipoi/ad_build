@@ -16,7 +16,7 @@ import { getLessons, getAllTopics } from './actions';
 import { LessonActionsDropdown } from './LessonActionsDropdown';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ITopic, ILesson } from '../types';
+import { ILesson } from '../types';
 
 type LessonsPageProps = {
   searchParams: Promise<{
@@ -34,7 +34,7 @@ const LessonsPage = async ({ searchParams }: LessonsPageProps) => {
   const topicId = params.topicId || '';
   const type = params.type || '';
 
-  const [lessonResult, topicResult] = await Promise.all([
+  const [lessonResult, topics] = await Promise.all([
     getLessons({ page, search, topicId, type }),
     getAllTopics()
   ]);
@@ -42,12 +42,11 @@ const LessonsPage = async ({ searchParams }: LessonsPageProps) => {
   if (!lessonResult.success) {
     return <div>Error: {'error' in lessonResult ? String(lessonResult.error) : 'Unknown error'}</div>;
   }
-  if (!topicResult.success) {
-    return <div>Error: {'error' in topicResult ? String(topicResult.error) : 'Unknown error'}</div>;
+  if (!topics || topics.length === 0) {
+    return <div>Error: No topics found</div>;
   }
 
   const { data: lessons, pagination } = lessonResult;
-  const { data: topics } = topicResult;
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -96,7 +95,7 @@ const LessonsPage = async ({ searchParams }: LessonsPageProps) => {
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="all">All Topics</SelectItem>
-                {topics.map((topic: ITopic & { courseId: { title: string } }) => (
+                {topics.map((topic) => (
                     <SelectItem key={topic._id} value={topic._id.toString()}>
                         {topic.courseId.title} - {topic.title}
                     </SelectItem>

@@ -25,7 +25,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { createLesson, updateLesson } from "./actions";
-import { ILesson, ITopic } from "../types";
+import { ILesson } from "../types";
 import { useState } from "react";
 
 const baseSchema = z.object({
@@ -49,7 +49,11 @@ type LessonFormData = z.infer<typeof lessonSchema>;
 
 type LessonFormProps = {
   lesson?: ILesson;
-  topics: Array<ITopic & { courseId: { title: string } }>;
+  topics: Array<{
+    _id: string;
+    title: string;
+    courseId: { title: string };
+  }>;
 };
 
 export function LessonForm({ lesson, topics }: LessonFormProps) {

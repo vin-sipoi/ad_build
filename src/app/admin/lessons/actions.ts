@@ -3,9 +3,9 @@
 import { dbConnect } from "@/lib/db";
 import { Lesson } from "@/models/Lesson";
 import { Topic } from "@/models/Topic";
-import { Course } from "@/models/Course";
 import { ILesson } from "../types";
 import { revalidatePath } from "next/cache";
+
 
 
 export async function getLessons(options: {
@@ -67,7 +67,16 @@ export async function getLessons(options: {
   }
 }
 
-export async function getAllTopics() {
+// Simple type for lesson form that matches what we actually need
+type LessonFormTopic = {
+    _id: string;
+    title: string;
+    courseId: {
+        title: string;
+    };
+};
+
+export async function getAllTopics(): Promise<LessonFormTopic[]> {
     try {
         console.log('getAllTopics: Starting...');
         await dbConnect();
@@ -76,29 +85,27 @@ export async function getAllTopics() {
         // Get topics with course information
         const topics = await Topic.find({})
             .populate('courseId', 'title')
-            .lean(); // Use lean() for better performance and simpler objects
+            .lean();
         
         console.log('getAllTopics: Topics found:', topics.length);
         
-        if (topics.length > 0) {
-            // Convert to plain objects with string IDs
-            const serializedTopics = topics.map(topic => ({
-                _id: topic._id.toString(),
-                title: topic.title,
-                courseId: topic.courseId._id.toString(),
-                courseName: topic.courseId.title || 'Unknown Course'
-            }));
-            
-            console.log('getAllTopics: First serialized topic:', serializedTopics[0]);
-            
-            return { success: true, data: serializedTopics };
-        } else {
-            console.log('getAllTopics: No topics found in database');
-            return { success: false, error: 'No topics found in database. Please create some topics first.' };
-        }
+
+        
+        // Convert to the expected format for LessonForm
+        const serializedTopics = topics.map((topic: Record<string, unknown>) => ({
+            _id: String(topic._id),
+            title: String(topic.title),
+            courseId: {
+                title: String((topic.courseId as Record<string, unknown>)?.title) || 'Unknown Course'
+            }
+        }));
+        
+        console.log('getAllTopics: First serialized topic:', serializedTopics[0]);
+        
+        return serializedTopics;
     } catch (error) {
         console.error('getAllTopics: Error fetching topics:', error);
-        return { success: false, error: error instanceof Error ? error.message : 'Failed to fetch topics' };
+        return [];
     }
 }
 
