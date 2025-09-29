@@ -78,7 +78,7 @@ export interface ILesson {
     passingScore: number;
   };
   order: number;
-  isActive: boolean;
+  status: 'draft' | 'published';
   slug: string;
   createdBy?: string;
   createdAt?: Date;

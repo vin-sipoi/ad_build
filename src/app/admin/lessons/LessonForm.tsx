@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { createLesson, updateLesson } from "./actions";
 import { ILesson } from "../types";
@@ -36,7 +35,7 @@ const baseSchema = z.object({
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
   estimatedMinutes: z.number().min(0, "Estimated minutes must be a positive number."),
   order: z.number().min(0, "Order must be a positive number."),
-  isActive: z.boolean(),
+  status: z.enum(["draft", "published"]),
   slug: z.string().min(1, "Slug is required."),
 });
 
@@ -73,7 +72,7 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
       order: lesson?.order || 0,
       content: lesson?.content || "",
       videoUrl: lesson?.videoUrl || "",
-      isActive: lesson?.isActive ?? true,
+      status: lesson?.status || "draft",
       slug: lesson?.slug || "",
     },
   });
@@ -292,21 +291,25 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
         />
         <FormField
           control={form.control}
-          name="isActive"
+          name="status"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Active</FormLabel>
-                <FormDescription>
-                  Inactive lessons will not be visible to students.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Only published lessons will be visible to students.
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />

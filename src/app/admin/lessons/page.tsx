@@ -163,10 +163,10 @@ const LessonsPage = async ({ searchParams }: LessonsPageProps) => {
                 <TableCell>{lesson.estimatedMinutes} min</TableCell>
                 <TableCell>
                   <Badge
-                    variant={lesson.isActive ? 'default' : 'destructive'}
-                    className={lesson.isActive ? 'bg-green-500' : ''}
+                    variant={(lesson as ILesson & { status: 'draft' | 'published' }).status === 'published' ? 'default' : 'destructive'}
+                    className={(lesson as ILesson & { status: 'draft' | 'published' }).status === 'published' ? 'bg-green-500' : ''}
                   >
-                    {lesson.isActive ? 'Active' : 'Inactive'}
+                    {(lesson as ILesson & { status: 'draft' | 'published' }).status === 'published' ? 'Published' : 'Draft'}
                   </Badge>
                 </TableCell>
                 <TableCell>

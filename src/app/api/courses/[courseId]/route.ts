@@ -23,16 +23,16 @@ export async function GET(
     }
 
     // Get topics for this course
-    const topics = await Topic.find({ courseId: courseId, isActive: true })
+    const topics = await Topic.find({ courseId: courseId, status: 'published' })
       .sort({ order: 1 })
       .lean();
 
     // Get lessons for each topic
     const topicsWithLessons = await Promise.all(
       topics.map(async (topic) => {
-        const lessons = await Lesson.find({ topicId: topic._id, isActive: true })
+        const lessons = await Lesson.find({ topicId: topic._id, status: 'published' })
           .sort({ order: 1 })
-          .select('title slug description type difficulty estimatedMinutes videoUrl order isActive')
+          .select('title slug description type difficulty estimatedMinutes videoUrl order status')
           .lean();
 
         return {
