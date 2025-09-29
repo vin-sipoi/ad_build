@@ -85,14 +85,22 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
     };
 
     try {
+        let result;
         if (isEditing) {
-            await updateLesson(lesson._id, lessonData);
+            result = await updateLesson(lesson._id, lessonData);
         } else {
-            await createLesson(lessonData);
+            result = await createLesson(lessonData);
         }
-        router.push("/admin/lessons");
+        
+        if (result.success) {
+            router.push("/admin/lessons");
+        } else {
+            console.error("Failed to save lesson:", result.error);
+            alert(`Failed to save lesson: ${result.error}`);
+        }
     } catch (error) {
         console.error("Failed to save lesson", error);
+        alert("An unexpected error occurred while saving the lesson");
     }
   }
 

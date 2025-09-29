@@ -156,7 +156,7 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
 
       {/* Topics Roadmap */}
       <div className="container mx-auto px-4 py-8">
-        {topics.length > 0 && (
+        {topics.length > 0 ? (
           <div className="relative">
             <div className="w-full space-y-4">
               {topics.map((topic, index) => (
@@ -169,6 +169,19 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
                 />
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-6">
+              <svg className="mx-auto h-20 w-20 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-semibold text-foreground mb-2">Course Content Coming Soon</h3>
+            <p className="text-muted-foreground max-w-md">
+              Our instructors are preparing amazing learning materials for this course. 
+              Stay tuned for updates!
+            </p>
           </div>
         )}
       </div>

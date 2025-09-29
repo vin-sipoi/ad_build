@@ -112,14 +112,35 @@ export async function getAllTopics(): Promise<LessonFormTopic[]> {
 export async function createLesson(data: Omit<ILesson, '_id' | 'createdAt' | 'updatedAt'>) {
     try {
         await dbConnect();
+        
+        // Get the topic to find the courseId
+        const topic = await Topic.findById(data.topicId);
+        if (!topic) {
+            return { success: false, error: "Selected topic not found" };
+        }
+        
         const slug = data.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim();
-        const lesson = new Lesson({ ...data, slug, createdBy: "60d21b4667d0d8992e610c85" });
+        
+        // Transform the data to match the Mongoose model
+        const lessonData = {
+            ...data,
+            slug,
+            courseId: topic.courseId, // Add the courseId from the topic
+            type: data.type === 'reading' ? 'article' : data.type, // Map 'reading' to 'article'
+            content: {
+                html: data.content || '',
+                videoUrl: data.videoUrl || '',
+            },
+            createdBy: "60d21b4667d0d8992e610c85"
+        };
+        
+        const lesson = new Lesson(lessonData);
         await lesson.save();
         revalidatePath("/admin/lessons");
         return { success: true, data: JSON.parse(JSON.stringify(lesson)) };
     } catch (error) {
         console.error("Error creating lesson:", error);
-        return { success: false, error: "Failed to create lesson" };
+        return { success: false, error: error instanceof Error ? error.message : "Failed to create lesson" };
     }
 }
 
@@ -127,13 +148,25 @@ export async function updateLesson(id: string, data: Partial<ILesson>) {
     try {
         await dbConnect();
         const slug = data.title?.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim();
-        const lesson = await Lesson.findByIdAndUpdate(id, { ...data, slug }, { new: true });
+        
+        // Transform the data to match the Mongoose model
+        const updateData = {
+            ...data,
+            slug,
+            type: data.type === 'reading' ? 'article' : data.type, // Map 'reading' to 'article'
+            content: {
+                html: data.content || '',
+                videoUrl: data.videoUrl || '',
+            }
+        };
+        
+        const lesson = await Lesson.findByIdAndUpdate(id, updateData, { new: true });
         revalidatePath("/admin/lessons");
         revalidatePath(`/admin/lessons/${id}`);
         return { success: true, data: JSON.parse(JSON.stringify(lesson)) };
     } catch (error) {
         console.error("Error updating lesson:", error);
-        return { success: false, error: "Failed to update lesson" };
+        return { success: false, error: error instanceof Error ? error.message : "Failed to update lesson" };
     }
 }
 

@@ -25,8 +25,10 @@ export function TopicContentModal({
 }: TopicContentModalProps) {
   const [currentSubtopicIndex, setCurrentSubtopicIndex] = useState(0);
   
-  const currentSubtopic = topic.subtopics[currentSubtopicIndex];
-  const progress = ((currentSubtopicIndex + 1) / topic.subtopics.length) * 100;
+  // Safe access to subtopics - fallback to lessons or empty array
+  const subtopics = topic.subtopics || (topic as unknown as { lessons?: unknown[] }).lessons || [];
+  const currentSubtopic = subtopics[currentSubtopicIndex];
+  const progress = subtopics.length > 0 ? ((currentSubtopicIndex + 1) / subtopics.length) * 100 : 0;
 
   const currentTopicIndex = allTopics.findIndex(t => t.id === topic.id);
   const canGoPrevTopic = currentTopicIndex > 0;
@@ -38,12 +40,13 @@ export function TopicContentModal({
     } else if (canGoPrevTopic) {
       const prevTopic = allTopics[currentTopicIndex - 1];
       onTopicChange(prevTopic.id);
-      setCurrentSubtopicIndex(prevTopic.subtopics.length - 1);
+      const prevSubtopics = prevTopic.subtopics || (prevTopic as unknown as { lessons?: unknown[] }).lessons || [];
+      setCurrentSubtopicIndex(prevSubtopics.length - 1);
     }
   };
 
   const handleNextSubtopic = () => {
-    if (currentSubtopicIndex < topic.subtopics.length - 1) {
+    if (currentSubtopicIndex < subtopics.length - 1) {
       setCurrentSubtopicIndex(currentSubtopicIndex + 1);
     } else if (canGoNextTopic) {
       const nextTopic = allTopics[currentTopicIndex + 1];
@@ -71,7 +74,7 @@ export function TopicContentModal({
             <div>
               <DialogTitle className="text-xl">{topic.title}</DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {currentSubtopicIndex + 1} of {topic.subtopics.length} • {topic.estimatedTime}
+                {currentSubtopicIndex + 1} of {subtopics.length} • {topic.estimatedTime}
               </p>
             </div>
             <div className="text-right">
@@ -84,39 +87,53 @@ export function TopicContentModal({
 
         <div className="mt-6">
           {/* Current Subtopic Content */}
-          <div className="bg-muted/30 rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-full bg-primary/10">
-                {getContentTypeIcon(currentSubtopic.type)}
+          {currentSubtopic ? (
+            <div className="bg-muted/30 rounded-lg p-6 mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-full bg-primary/10">
+                  {getContentTypeIcon(currentSubtopic.type)}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{currentSubtopic.title}</h3>
+                  <p className="text-sm text-muted-foreground">{currentSubtopic.description}</p>
+                </div>
+                <Badge variant="outline" className="ml-auto">
+                  {currentSubtopic.estimatedTime}
+                </Badge>
               </div>
-              <div>
-                <h3 className="font-semibold">{currentSubtopic.title}</h3>
-                <p className="text-sm text-muted-foreground">{currentSubtopic.description}</p>
+              
+              <div className="prose prose-sm max-w-none">
+                <p>{currentSubtopic.content}</p>
               </div>
-              <Badge variant="outline" className="ml-auto">
-                {currentSubtopic.estimatedTime}
-              </Badge>
-            </div>
-            
-            <div className="prose prose-sm max-w-none">
-              <p>{currentSubtopic.content}</p>
-            </div>
 
-            {/* Mock content based on type */}
-            {currentSubtopic.type === 'video' && (
-              <div className="bg-black/5 rounded-lg p-8 mt-4 text-center">
-                <Play className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Video content would appear here</p>
-              </div>
-            )}
+              {/* Mock content based on type */}
+              {currentSubtopic.type === 'video' && (
+                <div className="bg-black/5 rounded-lg p-8 mt-4 text-center">
+                  <Play className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Video content would appear here</p>
+                </div>
+              )}
 
-            {currentSubtopic.type === 'quiz' && (
-              <div className="bg-primary/5 rounded-lg p-4 mt-4">
-                <div className="text-sm font-medium mb-2">Knowledge Check</div>
-                <p className="text-sm text-muted-foreground">Interactive quiz would appear here</p>
+              {currentSubtopic.type === 'quiz' && (
+                <div className="bg-primary/5 rounded-lg p-4 mt-4">
+                  <div className="text-sm font-medium mb-2">Knowledge Check</div>
+                  <p className="text-sm text-muted-foreground">Interactive quiz would appear here</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-muted/30 rounded-lg p-8 text-center">
+              <div className="mb-4">
+                <svg className="mx-auto h-16 w-16 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
               </div>
-            )}
-          </div>
+              <h3 className="text-lg font-semibold mb-2">Content Coming Soon</h3>
+              <p className="text-muted-foreground">
+                Lessons for this topic are being prepared. Check back soon for updates!
+              </p>
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex items-center justify-between">
@@ -131,7 +148,7 @@ export function TopicContentModal({
             </Button>
 
             <div className="flex items-center gap-2">
-              {topic.subtopics.map((_, index) => (
+              {subtopics.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSubtopicIndex(index)}
@@ -148,7 +165,7 @@ export function TopicContentModal({
 
             <Button
               onClick={handleNextSubtopic}
-              disabled={currentSubtopicIndex === topic.subtopics.length - 1 && !canGoNextTopic}
+              disabled={currentSubtopicIndex === subtopics.length - 1 && !canGoNextTopic}
               className="flex items-center gap-2"
             >
               Next
