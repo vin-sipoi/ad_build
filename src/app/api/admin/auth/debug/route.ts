@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 
+type VerifyResult = { success: true; decoded: Record<string, unknown> } | { success: false; error: string };
+type SessionResult = { success: true; length: number } | { success: false; error: string };
+type DebugResult = {
+  adminAuthConfigured: boolean;
+  env: Record<string, boolean>;
+  verify?: VerifyResult | null;
+  createSessionCookie?: SessionResult | null;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const secret = request.headers.get('x-debug-secret');
@@ -14,8 +23,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json().catch(() => ({}));
-    const idToken = body?.idToken;
+    const body = await request.json().catch(() => ({} as Record<string, unknown>));
+    const idToken = (body && typeof body === 'object' && 'idToken' in body)
+      ? (body as Record<string, unknown>)['idToken'] as string | undefined
+      : undefined;
 
     const env = {
       hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
@@ -25,7 +36,7 @@ export async function POST(request: NextRequest) {
       privateKeyContainsRealNewlines: (process.env.FIREBASE_PRIVATE_KEY || '').includes('\n'),
     };
 
-    const result: any = {
+    const result: DebugResult = {
       adminAuthConfigured: !!adminAuth,
       env,
       verify: null,
@@ -38,19 +49,21 @@ export async function POST(request: NextRequest) {
 
     if (idToken) {
       try {
-        const decoded = await adminAuth.verifyIdToken(idToken);
-        result.verify = { success: true, decoded };
-      } catch (err: any) {
-        result.verify = { success: false, error: err?.code || err?.message || String(err) };
+        const decoded = await adminAuth.verifyIdToken(String(idToken));
+        result.verify = { success: true, decoded } as VerifyResult;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        result.verify = { success: false, error: message };
       }
 
       // Try creating a short session cookie (catches errors in createSessionCookie)
       try {
         const expiresIn = 60 * 60 * 1000; // 1 hour
-        const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-        result.createSessionCookie = { success: true, length: sessionCookie.length };
-      } catch (err: any) {
-        result.createSessionCookie = { success: false, error: err?.code || err?.message || String(err) };
+        const sessionCookie = await adminAuth.createSessionCookie(String(idToken), { expiresIn });
+        result.createSessionCookie = { success: true, length: sessionCookie.length } as SessionResult;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        result.createSessionCookie = { success: false, error: message };
       }
     }
 
