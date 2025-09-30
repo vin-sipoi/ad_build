@@ -1,3 +1,8 @@
+export interface LessonSummary {
+  id: string;
+  title: string;
+  // Add other lesson properties as needed
+}
 // Academy and Learning Types - Roadmap Structure
 import { UserRole } from './user';
 
@@ -22,6 +27,7 @@ export interface Topic {
   isUnlocked: boolean;
   isCompleted: boolean;
   isLocked: boolean;
+  lessons?: LessonSummary[]; // More specific type for dashboard topic unlocking
 }
 
 export interface Module {

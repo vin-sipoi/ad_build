@@ -101,8 +101,15 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
     }
   };
 
+  // Unlock all topics with published lessons
   const isTopicLocked = (topicIndex: number) => {
-    if (topicIndex === 0) return false; // First topic is always unlocked
+    const topic = topics[topicIndex];
+    // If topic has at least one published lesson, unlock it
+    if (topic.lessons && topic.lessons.length > 0) {
+      return false;
+    }
+    // Otherwise, use the old logic for sequential unlocking
+    if (topicIndex === 0) return false;
     const previousTopic = topics[topicIndex - 1];
     return previousTopic ? !completedTopics.has(previousTopic.id) : false;
   };
