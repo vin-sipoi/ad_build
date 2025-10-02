@@ -447,7 +447,7 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Topic</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a topic" />
@@ -477,7 +477,7 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
                   field.onChange(value);
                   setLessonType(value as "reading" | "video" | "quiz");
                 }}
-                defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -727,7 +727,7 @@ export function LessonForm({ lesson, topics }: LessonFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

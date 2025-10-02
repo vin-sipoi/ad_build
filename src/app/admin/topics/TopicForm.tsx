@@ -138,7 +138,7 @@ export function TopicForm({ topic, courses }: TopicFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Course</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a course" />
@@ -201,7 +201,7 @@ export function TopicForm({ topic, courses }: TopicFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
