@@ -2,6 +2,8 @@ import { LessonForm } from "../LessonForm";
 import { getAllTopics } from "../actions";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 const NewLessonPage = async () => {
   console.log('🔄 NewLessonPage: Starting...');
   const topics = await getAllTopics();

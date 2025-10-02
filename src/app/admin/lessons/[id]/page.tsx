@@ -1,6 +1,8 @@
 import { LessonForm } from "../LessonForm";
 import { getLessonById, getAllTopics } from "../actions";
 
+export const dynamic = 'force-dynamic';
+
 type EditLessonPageProps = {
   params: Promise<{
     id: string;

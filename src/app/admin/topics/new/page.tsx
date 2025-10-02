@@ -1,6 +1,8 @@
 import { TopicForm } from "../TopicForm";
 import { getAllCourses } from "../actions";
 
+export const dynamic = 'force-dynamic';
+
 const NewTopicPage = async () => {
   const courseResult = await getAllCourses();
 

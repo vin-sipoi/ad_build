@@ -1,5 +1,7 @@
 import { CourseForm } from "../CourseForm";
 
+export const dynamic = 'force-dynamic';
+
 const NewCoursePage = () => {
   return (
     <div className="space-y-6">

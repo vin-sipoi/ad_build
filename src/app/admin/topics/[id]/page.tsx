@@ -1,6 +1,8 @@
 import { TopicForm } from "../TopicForm";
 import { getTopicById, getAllCourses } from "../actions";
 
+export const dynamic = 'force-dynamic';
+
 type EditTopicPageProps = {
   params: Promise<{
     id: string;

@@ -1,6 +1,8 @@
 import { CourseForm } from "../CourseForm";
 import { getCourseById } from "../actions";
 
+export const dynamic = 'force-dynamic';
+
 type EditCoursePageProps = {
   params: Promise<{
     id: string;
