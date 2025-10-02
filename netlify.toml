@@ -1,0 +1,34 @@
+# Netlify Configuration
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Disable secrets scanning for public Firebase config
+# Firebase API keys are safe to expose in client-side code
+# They are restricted by Firebase security rules
+[build.environment]
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyB8n0jlBDWOgfwv6LR0bt2CrNol4R3NMYQ"
+
+# Headers for caching
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Image optimization redirects
+[[redirects]]
+  from = "/_next/image"
+  to = "/.netlify/images?url=:url&w=:width&q=:quality"
+  status = 200
+  query = {url = ":url", w = ":width", q = ":quality"}
+
+[[redirects]]
+  from = "/_ipx/*"
+  to = "/.netlify/images?url=:url&w=:width&q=:quality"
+  status = 200
+  query = {url = ":url", w = ":width", q = ":quality"}
