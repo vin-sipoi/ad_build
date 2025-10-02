@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import { User } from '@/models/User';
+import '@/models/Course'; // Register Course model for Mongoose schema
+import '@/models/Topic'; // Register Topic model for Mongoose schema
+import '@/models/Lesson'; // Register Lesson model for Mongoose schema
 import { Progress } from '@/models/Progress';
 import { CreditTransaction } from '@/models/CreditTransaction';
 import { withAuth, AuthUser } from '@/lib/auth';

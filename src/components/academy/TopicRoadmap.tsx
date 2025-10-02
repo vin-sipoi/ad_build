@@ -14,7 +14,53 @@ interface TopicNodeProps {
   isCompleted: boolean;
   isLocked: boolean;
   onTopicClick: (topicId: string) => void;
+  index: number;
 }
+
+const TOPIC_GRADIENTS = [
+  {
+    card: "from-sky-500/25 via-blue-500/20 to-indigo-500/25",
+    border: "border-sky-400/40",
+    icon: "bg-sky-400/30 text-sky-100",
+    arrow: "text-sky-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(59,130,246,0.65)]",
+  },
+  {
+    card: "from-violet-600/25 via-purple-500/20 to-fuchsia-500/25",
+    border: "border-fuchsia-400/40",
+    icon: "bg-fuchsia-400/30 text-fuchsia-100",
+    arrow: "text-fuchsia-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(192,132,252,0.6)]",
+  },
+  {
+    card: "from-amber-500/25 via-orange-500/20 to-rose-500/25",
+    border: "border-amber-400/40",
+    icon: "bg-amber-400/30 text-amber-100",
+    arrow: "text-amber-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(251,191,36,0.55)]",
+  },
+  {
+    card: "from-emerald-500/25 via-teal-500/20 to-lime-500/25",
+    border: "border-emerald-400/40",
+    icon: "bg-emerald-400/30 text-emerald-100",
+    arrow: "text-emerald-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(52,211,153,0.55)]",
+  },
+  {
+    card: "from-rose-500/25 via-pink-500/20 to-purple-500/25",
+    border: "border-rose-400/40",
+    icon: "bg-rose-400/30 text-rose-100",
+    arrow: "text-rose-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(244,114,182,0.55)]",
+  },
+  {
+    card: "from-cyan-500/25 via-teal-500/20 to-blue-500/25",
+    border: "border-cyan-400/40",
+    icon: "bg-cyan-400/30 text-cyan-100",
+    arrow: "text-cyan-100",
+    shadow: "shadow-[0_12px_40px_-18px_rgba(34,211,238,0.55)]",
+  },
+];
 
 function getTopicIcon(topic: Topic) {
   const title = topic.title.toLowerCase();
@@ -26,55 +72,51 @@ function getTopicIcon(topic: Topic) {
   return <Play className="h-5 w-5" />;
 }
 
-function TopicNode({ topic, isCompleted, isLocked, onTopicClick }: TopicNodeProps) {
-  const getColors = () => {
+function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index }: TopicNodeProps) {
+  const getGradientVisuals = () => {
     if (isLocked) {
-      return 'bg-gray-800/50 text-gray-500 border-gray-700';
+      return {
+        card: 'bg-gray-900/40 border-gray-700 text-gray-400',
+        icon: 'bg-gray-700 text-gray-400',
+        arrow: 'text-gray-500',
+        extra: '',
+      };
     }
+
     if (isCompleted) {
-      return 'bg-green-900/50 text-green-300 border-green-700 hover:bg-green-900/80';
+      return {
+        card: 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/15 to-emerald-400/25 border-emerald-400/60 text-emerald-50 shadow-[0_14px_45px_-15px_rgba(16,185,129,0.65)]',
+        icon: 'bg-emerald-500/30 text-emerald-100',
+        arrow: 'text-emerald-100',
+        extra: 'ring-1 ring-emerald-400/40',
+      };
     }
-    const title = topic.title.toLowerCase();
-    if (title.includes('fundamentals')) {
-      return 'bg-blue-900/50 text-blue-300 border-blue-700 hover:bg-blue-900/80';
-    }
-    if (title.includes('messaging') || title.includes('transfer') || title.includes('chainlink')) {
-      return 'bg-gray-900/50 text-gray-300 border-gray-700 hover:bg-gray-900/80';
-    }
-    if (title.includes('tokenomics') || title.includes('evm')) {
-        return 'bg-red-900/50 text-red-300 border-red-700 hover:bg-red-900/80';
-    }
-    if (title.includes('permissioned')) {
-        return 'bg-teal-900/50 text-teal-300 border-teal-700 hover:bg-teal-900/80';
-    }
-    return 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700';
+
+    const palette = TOPIC_GRADIENTS[index % TOPIC_GRADIENTS.length];
+    return {
+      card: `bg-gradient-to-r ${palette.card} ${palette.border} text-white/90 ${palette.shadow}`,
+      icon: palette.icon,
+      arrow: palette.arrow,
+      extra: 'ring-1 ring-white/5',
+    };
   };
 
-  const iconColor = () => {
-    if (isLocked) return 'bg-gray-700 text-gray-500';
-    if (isCompleted) return 'bg-green-800 text-green-300';
-    const title = topic.title.toLowerCase();
-    if (title.includes('fundamentals')) return 'bg-blue-800 text-blue-300';
-    if (title.includes('messaging') || title.includes('transfer') || title.includes('chainlink')) return 'bg-gray-800 text-gray-300';
-    if (title.includes('tokenomics') || title.includes('evm')) return 'bg-red-800 text-red-300';
-    if (title.includes('permissioned')) return 'bg-teal-800 text-teal-300';
-    return 'bg-slate-700 text-slate-300';
-  }
+  const visuals = getGradientVisuals();
 
   return (
     <div
       onClick={() => !isLocked && onTopicClick(topic.id)}
-      className={`w-full flex items-center p-4 rounded-lg border transition-all duration-300 group ${getColors()} ${!isLocked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+      className={`w-full flex items-center p-4 rounded-xl border transition-all duration-300 group ${visuals.card} ${visuals.extra} ${!isLocked ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl' : 'cursor-not-allowed'}`}
     >
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-white truncate">{topic.title}</h3>
-        <p className="text-sm opacity-80 line-clamp-2">{topic.description}</p>
+        <p className="text-sm text-white/80 line-clamp-2">{topic.description}</p>
       </div>
       <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-        <div className={`p-2 rounded-full ${iconColor()}`}>
+        <div className={`p-2 rounded-full ${visuals.icon}`}>
           {getTopicIcon(topic)}
         </div>
-        <ArrowRight className="h-5 w-5 text-gray-500 group-hover:text-white transition-colors" />
+        <ArrowRight className={`h-5 w-5 transition-colors ${visuals.arrow} group-hover:text-white`} />
       </div>
     </div>
   );
@@ -131,8 +173,7 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             {/* Title Section */}
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">{course.title}</h1>
-              <p className="text-muted-foreground text-sm">Learning Roadmap</p>
+              <p className="text-lg sm:text-xl font-semibold text-muted-foreground">Learner Modules</p>
             </div>
             
             {/* Stats Section - Responsive layout */}
@@ -173,6 +214,7 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
                   isCompleted={isTopicCompleted(topic.id)}
                   isLocked={isTopicLocked(index)}
                   onTopicClick={handleTopicClick}
+                  index={index}
                 />
               ))}
             </div>

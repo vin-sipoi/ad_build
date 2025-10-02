@@ -3,6 +3,9 @@ import { getTopics, getAllCourses } from './actions';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ICourse, ITopic } from '../types';
+
+// Force dynamic rendering for admin pages that use cookies
+export const dynamic = 'force-dynamic';
 import {
   Table,
   TableBody,

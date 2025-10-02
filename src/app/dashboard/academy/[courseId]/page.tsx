@@ -131,6 +131,7 @@ export default function CourseDetailPage() {
           topic={selectedTopic}
           allTopics={allTopics}
           onTopicChange={handleTopicChange}
+          courseId={course.id}
         />
       )}
     </div>

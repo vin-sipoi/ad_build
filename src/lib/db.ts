@@ -1,11 +1,18 @@
 import mongoose from 'mongoose';
 import { User } from '@/models/User';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/adamur-academy';
+// Force Atlas connection - no fallback to local MongoDB
+const MONGODB_URI: string = process.env.MONGODB_URI!;
 
-if (!MONGODB_URI) {
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI not found in environment variables!');
+  console.error('📝 Available env vars:', Object.keys(process.env).filter(k => k.includes('MONGO')));
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
+
+// Log what we're connecting to (hide password)
+console.log('🔗 MongoDB URI configured:', MONGODB_URI.includes('localhost') ? '❌ LOCAL (should be Atlas!)' : '✅ ATLAS');
+console.log('📍 Connection string:', MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -85,5 +92,23 @@ export async function dbConnect(): Promise<typeof mongoose> {
     throw e;
   }
 
+  return cached.conn;
+}
+
+/**
+ * Connect to MongoDB using the cached connection.
+ */
+export async function connectDB(): Promise<typeof mongoose> {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
+      return mongoose;
+    });
+  }
+
+  cached.conn = await cached.promise;
   return cached.conn;
 }

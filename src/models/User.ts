@@ -9,6 +9,7 @@ export interface IUser extends Document {
     avatarUrl?: string;
     bio?: string;
   };
+  myPath: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,10 @@ const UserSchema = new Schema<IUser>({
   profile: {
     avatarUrl: String,
     bio: String,
+  },
+  myPath: {
+    type: [String],
+    default: [],
   },
 }, { 
   timestamps: true 

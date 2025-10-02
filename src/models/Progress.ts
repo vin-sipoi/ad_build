@@ -10,6 +10,16 @@ export interface IProgress extends Document {
   startedAt?: Date;
   completedAt?: Date;
   timeSpentSeconds: number;
+  quizScore?: number;
+  score?: number; // legacy alias
+  quizPassed?: boolean;
+  quizAttempts: number;
+  lastAttemptAt?: Date;
+  quizResponses?: Array<{
+    question: string;
+    selectedOption: number | null;
+    isCorrect: boolean;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,6 +61,35 @@ const ProgressSchema = new Schema<IProgress>({
     default: 0,
     min: 0 
   },
+  quizScore: {
+    type: Number,
+    min: 0,
+    max: 100,
+  },
+  score: {
+    type: Number,
+    min: 0,
+    max: 100,
+  },
+  quizPassed: {
+    type: Boolean,
+    default: false,
+  },
+  quizAttempts: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  lastAttemptAt: {
+    type: Date,
+  },
+  quizResponses: [
+    {
+      question: { type: String, required: true },
+      selectedOption: { type: Number },
+      isCorrect: { type: Boolean, required: true },
+    }
+  ],
 }, { 
   timestamps: true 
 });

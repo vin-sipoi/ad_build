@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import { Lesson } from '@/models/Lesson';
 import { Topic } from '@/models/Topic';
+import '@/models/Course'; // Register Course model for Mongoose schema
 import { withAuth, AuthUser } from '@/lib/auth';
 
 // GET /api/admin/lessons - Get all lessons with filtering and pagination

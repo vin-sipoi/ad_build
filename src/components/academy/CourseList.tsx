@@ -2,19 +2,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { CourseCard } from './CourseCard';
+import { CourseModal } from './CourseModal';
 import { Course } from '@/types/academy';
 
 export function CourseList() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedTrack, setSelectedTrack] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStartingCourse, setIsStartingCourse] = useState(false);
 
 
   useEffect(() => {
@@ -53,6 +59,52 @@ export function CourseList() {
       console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    if (isStartingCourse) return;
+    setIsModalOpen(false);
+    setSelectedCourse(null);
+  };
+
+  const handleGetStarted = async () => {
+    if (!selectedCourse) return;
+
+    setIsStartingCourse(true);
+    try {
+      const response = await fetch('/api/user/my-path', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ courseId: selectedCourse.id || selectedCourse._id }),
+      });
+
+      let responseBody: unknown = null;
+      try {
+        responseBody = await response.json();
+      } catch {
+        // ignore body parse errors
+      }
+
+      if (!response.ok) {
+        console.error('Failed to add course to My Journey', responseBody);
+        return;
+      }
+
+      setIsModalOpen(false);
+      router.push(`/dashboard/academy/${selectedCourse.id || selectedCourse._id}`);
+      setSelectedCourse(null);
+    } catch (error) {
+      console.error('Error starting course:', error);
+    } finally {
+      setIsStartingCourse(false);
     }
   };
 
@@ -122,9 +174,10 @@ export function CourseList() {
       {/* Course Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {filteredCourses.map((course) => (
-          <CourseCard 
-            key={course._id} 
+          <CourseCard
+            key={course._id ?? course.id}
             course={course}
+            onSelect={handleSelectCourse}
           />
         ))}
       </div>
@@ -136,6 +189,15 @@ export function CourseList() {
         </div>
       )}
 
+      {selectedCourse && (
+        <CourseModal
+          course={selectedCourse}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onGetStarted={handleGetStarted}
+          isProcessing={isStartingCourse}
+        />
+      )}
 
     </div>
   );

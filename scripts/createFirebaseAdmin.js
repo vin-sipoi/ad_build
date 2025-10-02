@@ -37,7 +37,7 @@ try {
       privateKey,
     }),
   });
-} catch (err) {
+} catch {
   // initializeApp can throw if already initialized; ignore
 }
 

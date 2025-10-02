@@ -8,6 +8,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+
+// Force dynamic rendering for admin pages that use cookies
+export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 

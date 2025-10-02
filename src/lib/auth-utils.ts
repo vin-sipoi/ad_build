@@ -1,4 +1,5 @@
 import { User } from 'firebase/auth';
+import { NextRequest } from 'next/server';
 
 /**
  * Check if a user has admin claims by getting their ID token
@@ -32,4 +33,12 @@ export async function getRedirectUrlForUser(user: User): Promise<string> {
   }
   
   return '/dashboard';
+}
+
+/**
+ * Mock implementation of getSession to retrieve user session data.
+ */
+export async function getSession(_request: NextRequest): Promise<{ user: { id: string } } | null> {
+  // Replace with actual session retrieval logic
+  return { user: { id: '507f1f77bcf86cd799439011' } };
 }

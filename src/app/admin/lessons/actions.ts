@@ -3,6 +3,7 @@
 import { dbConnect } from "@/lib/db";
 import { Lesson } from "@/models/Lesson";
 import { Topic } from "@/models/Topic";
+import "@/models/Course"; // Register Course model for Mongoose schema
 import { ILesson } from "../types";
 import { revalidatePath } from "next/cache";
 
@@ -131,7 +132,13 @@ export async function getAllTopics(): Promise<LessonFormTopic[]> {
 
 export async function createLesson(data: Omit<ILesson, '_id' | 'createdAt' | 'updatedAt'>) {
     try {
+        console.log('📝 createLesson: Starting...');
         await dbConnect();
+        
+        // Log database connection info
+        const mongoose = await import('mongoose');
+        console.log('📊 Database:', mongoose.default.connection.db?.databaseName);
+        console.log('🔗 Connection state:', mongoose.default.connection.readyState);
         
         // Get the topic to find the courseId
         const topic = await Topic.findById(data.topicId);
@@ -140,26 +147,50 @@ export async function createLesson(data: Omit<ILesson, '_id' | 'createdAt' | 'up
         }
         
         const slug = data.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim();
+    const normalizedType = data.type === 'reading' ? 'article' : data.type;
+    const quiz = normalizedType === 'quiz' ? data.quiz : undefined;
         
         // Transform the data to match the Mongoose model
         const lessonData = {
-            ...data,
             slug,
             courseId: topic.courseId, // Add the courseId from the topic
-            type: data.type === 'reading' ? 'article' : data.type, // Map 'reading' to 'article'
-            content: {
-                html: data.content || '',
-                videoUrl: data.videoUrl || '',
-            },
-            createdBy: "60d21b4667d0d8992e610c85"
+      title: data.title,
+      description: data.description,
+      topicId: data.topicId,
+      type: normalizedType,
+      difficulty: data.difficulty,
+      estimatedMinutes: data.estimatedMinutes,
+      order: data.order,
+      status: data.status,
+      content: {
+        html: normalizedType === 'article' ? data.content || '' : '',
+      },
+      videoUrl: normalizedType === 'video' ? data.videoUrl || '' : '',
+      quiz,
+      resources: data.resources || [],
+      creditsAwarded: data.creditsAwarded,
+      createdBy: "60d21b4667d0d8992e610c85"
         };
         
+        console.log('📦 Prepared lesson data:', {
+          title: lessonData.title,
+          slug: lessonData.slug,
+          type: lessonData.type,
+          collection: Lesson.collection.name
+        });
+        
         const lesson = new Lesson(lessonData);
+        console.log('💾 Saving to collection:', lesson.collection.name);
+        
         await lesson.save();
+        console.log('✅ Lesson saved with ID:', lesson._id);
+        console.log('📍 Collection:', lesson.collection.name);
+        console.log('📊 Database:', mongoose.connection.db?.databaseName);
+        
         revalidatePath("/admin/lessons");
         return { success: true, data: JSON.parse(JSON.stringify(lesson)) };
     } catch (error) {
-        console.error("Error creating lesson:", error);
+        console.error("❌ Error creating lesson:", error);
         return { success: false, error: error instanceof Error ? error.message : "Failed to create lesson" };
     }
 }
@@ -168,17 +199,42 @@ export async function updateLesson(id: string, data: Partial<ILesson>) {
     try {
         await dbConnect();
         const slug = data.title?.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim();
+    const normalizedType = data.type === 'reading' ? 'article' : data.type;
+    const quiz = normalizedType === 'quiz' ? data.quiz : undefined;
         
-        // Transform the data to match the Mongoose model
-        const updateData = {
-            ...data,
-            slug,
-            type: data.type === 'reading' ? 'article' : data.type, // Map 'reading' to 'article'
-            content: {
-                html: data.content || '',
-                videoUrl: data.videoUrl || '',
-            }
-        };
+    // Transform the data to match the Mongoose model
+    const updateData: Record<string, unknown> = {};
+
+    if (slug) updateData.slug = slug;
+    if (data.title) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.topicId) updateData.topicId = data.topicId;
+    if (data.difficulty) updateData.difficulty = data.difficulty;
+    if (typeof data.estimatedMinutes === 'number') updateData.estimatedMinutes = data.estimatedMinutes;
+    if (typeof data.order === 'number') updateData.order = data.order;
+    if (data.status) updateData.status = data.status;
+    if (data.resources) updateData.resources = data.resources;
+    if (data.creditsAwarded !== undefined) updateData.creditsAwarded = data.creditsAwarded;
+
+    if (normalizedType) {
+      updateData.type = normalizedType;
+    }
+
+    if (data.content !== undefined || normalizedType === 'article') {
+      updateData.content = {
+        html: normalizedType === 'article' ? data.content || '' : '',
+      };
+    }
+
+    if (data.videoUrl !== undefined || normalizedType === 'video') {
+      updateData.videoUrl = normalizedType === 'video' ? data.videoUrl || '' : '';
+    }
+
+    if (quiz !== undefined) {
+      updateData.quiz = quiz;
+    } else if (normalizedType && normalizedType !== 'quiz') {
+      updateData.quiz = undefined;
+    }
         
         const lesson = await Lesson.findByIdAndUpdate(id, updateData, { new: true });
         revalidatePath("/admin/lessons");

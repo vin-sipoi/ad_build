@@ -1,6 +1,4 @@
 'use client';
-
-import Image from 'next/image';
 import { X, Play, Clock, Users, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,9 +9,12 @@ interface CourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGetStarted: () => void;
+  isProcessing?: boolean;
 }
 
-export function CourseModal({ course, isOpen, onClose, onGetStarted }: CourseModalProps) {
+export function CourseModal({ course, isOpen, onClose, onGetStarted, isProcessing = false }: CourseModalProps) {
+  const summaryText = course.summary ?? course.description;
+
   if (!isOpen) return null;
 
   return (
@@ -21,38 +22,38 @@ export function CourseModal({ course, isOpen, onClose, onGetStarted }: CourseMod
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => {
+          if (!isProcessing) {
+            onClose();
+          }
+        }}
       />
 
       {/* Modal */}
       <div className="relative w-full max-w-2xl mx-4 bg-card border rounded-lg shadow-2xl">
         {/* Header */}
-        <div className="relative h-48 overflow-hidden rounded-t-lg">
-          <Image
-            src={course.thumbnail}
-            alt={course.title}
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
+        <div className="relative rounded-t-lg bg-muted/30 p-6">
           {/* Close Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-4 right-4 text-white hover:bg-white/20"
-            onClick={onClose}
+            className="absolute top-4 right-4"
+            onClick={() => {
+              if (!isProcessing) {
+                onClose();
+              }
+            }}
           >
             <X className="h-4 w-4" />
           </Button>
 
-          {/* Course Info Overlay */}
-          <div className="absolute bottom-4 left-4 text-white">
-            <Badge variant="secondary" className="mb-2">
+          {/* Course Info */}
+          <div className="space-y-2 pr-10">
+            <Badge variant="secondary" className="w-fit">
               {course.difficulty}
             </Badge>
-            <h2 className="text-xl font-bold">{course.title}</h2>
-            <p className="text-sm opacity-90">{course.description}</p>
+            <h2 className="text-xl font-bold text-foreground">{course.title}</h2>
+            <p className="text-sm text-muted-foreground">{course.description}</p>
           </div>
         </div>
 
@@ -76,9 +77,15 @@ export function CourseModal({ course, isOpen, onClose, onGetStarted }: CourseMod
             </div>
           </div>
 
+          <div className="mb-6">
+            <h3 className="font-semibold mb-3">Course Summary</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+              {summaryText}
+            </p>
+          </div>
+
           {/* Modules Preview */}
           <div className="mb-6">
-            <h3 className="font-semibold mb-3">Course Modules</h3>
             <div className="space-y-2">
               {course.modules.slice(0, 3).map((module, index) => (
                 <div key={module.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
@@ -106,12 +113,20 @@ export function CourseModal({ course, isOpen, onClose, onGetStarted }: CourseMod
             ⭐ {course.rating} ({course.enrolledCount} students)
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={onClose}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!isProcessing) {
+                  onClose();
+                }
+              }}
+              disabled={isProcessing}
+            >
               Cancel
             </Button>
-            <Button onClick={onGetStarted}>
+            <Button onClick={onGetStarted} disabled={isProcessing}>
               <Play className="h-4 w-4 mr-2" />
-              Get Started
+              {isProcessing ? 'Starting...' : 'Get Started'}
             </Button>
           </div>
         </div>

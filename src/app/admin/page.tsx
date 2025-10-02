@@ -16,6 +16,9 @@ import { Course } from '@/models/Course';
 import { Lesson } from '@/models/Lesson';
 import { MentorApplication } from '@/models/MentorApplication';
 
+// Force dynamic rendering for admin pages that use cookies
+export const dynamic = 'force-dynamic';
+
 // Helper function to fetch admin stats
 async function fetchAdminStats() {
   try {

@@ -3,7 +3,7 @@
 import { dbConnect } from "@/lib/db";
 import { Topic } from "@/models/Topic";
 import { Course } from "@/models/Course";
-// import { Lesson } from "@/models/Lesson";
+import "@/models/Lesson"; // Register Lesson model for Mongoose schema
 import { ITopic } from "../types";
 import { revalidatePath } from "next/cache";
 import { mockTopics, mockCourses } from "@/lib/mockData";

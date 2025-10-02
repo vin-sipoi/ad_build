@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import { Course } from '@/models/Course';
 import { Topic } from '@/models/Topic';
-import { Lesson } from '@/models/Lesson';
+import { Lesson, type ILessonQuizQuestion } from '@/models/Lesson';
 
 export async function GET(
   req: NextRequest,
@@ -32,13 +32,49 @@ export async function GET(
       topics.map(async (topic) => {
         const lessons = await Lesson.find({ topicId: topic._id, status: 'published' })
           .sort({ order: 1 })
-          .select('title slug description type difficulty estimatedMinutes videoUrl order status content')
+          .select('title slug description type difficulty estimatedMinutes videoUrl order status content quiz')
           .lean();
 
         console.log(`Topic "${topic.title}" has ${lessons.length} published lessons`);
         if (lessons.length > 0) {
           console.log(`First lesson content sample:`, lessons[0].content);
         }
+
+        const lessonSummaries = lessons.map(lesson => {
+          const normalizedType = lesson.type === 'article' ? 'reading' : lesson.type;
+          const lessonContent = typeof lesson.content === 'string'
+            ? lesson.content
+            : lesson.content?.html || '';
+
+          const quizData = lesson.quiz && Array.isArray(lesson.quiz.questions)
+            ? {
+                passingScore: lesson.quiz.passingScore ?? 70,
+                questions: (lesson.quiz.questions as ILessonQuizQuestion[]).map((question) => ({
+                  question: question.question,
+                  options: question.options || [],
+                  correctAnswer: question.correctAnswer,
+                  explanation: question.explanation,
+                })),
+              }
+            : undefined;
+
+          return {
+            id: String(lesson._id),
+            title: lesson.title,
+            slug: lesson.slug,
+            description: lesson.description || '',
+            type: normalizedType,
+            difficulty: lesson.difficulty,
+            duration: lesson.estimatedMinutes || 0,
+            videoUrl: lesson.videoUrl || null,
+            content: lessonContent,
+            estimatedTime: `${lesson.estimatedMinutes || 0} min`,
+            isCompleted: false, // TODO: Add user progress tracking
+            isLocked: false, // TODO: Add lesson progression logic
+            order: lesson.order,
+            quiz: quizData,
+          };
+        });
 
         return {
           id: String(topic._id),
@@ -47,21 +83,8 @@ export async function GET(
           description: topic.description || '',
           order: topic.order,
           isCompleted: false, // TODO: Add user progress tracking
-          lessons: lessons.map(lesson => ({
-            id: String(lesson._id),
-            title: lesson.title,
-            slug: lesson.slug,
-            description: lesson.description || '',
-            type: lesson.type,
-            difficulty: lesson.difficulty,
-            duration: lesson.estimatedMinutes || 0,
-            videoUrl: lesson.videoUrl || null,
-            content: lesson.content?.html || (typeof lesson.content === 'string' ? lesson.content : '') || '',
-            estimatedTime: `${lesson.estimatedMinutes || 0} min`,
-            isCompleted: false, // TODO: Add user progress tracking
-            isLocked: false, // TODO: Add lesson progression logic
-            order: lesson.order
-          }))
+          lessons: lessonSummaries,
+          subtopics: lessonSummaries,
         };
       })
     );

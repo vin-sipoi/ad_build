@@ -12,6 +12,9 @@ import {
   PieChart,
   Download
 } from 'lucide-react';
+
+// Force dynamic rendering for admin pages that use cookies
+export const dynamic = 'force-dynamic';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { dbConnect } from '@/lib/db';
 import { User } from '@/models/User';

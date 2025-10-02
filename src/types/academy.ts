@@ -6,22 +6,39 @@ export interface LessonSummary {
 // Academy and Learning Types - Roadmap Structure
 import { UserRole } from './user';
 
+export interface LessonQuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
+}
+
+export interface LessonQuiz {
+  passingScore: number;
+  questions: LessonQuizQuestion[];
+}
+
 export interface Subtopic {
   id: string;
   title: string;
   description?: string; // made optional to accommodate existing mock data
-  content: string;
-  type: 'text' | 'video' | 'quiz' | 'interactive';
-  estimatedTime: string;
-  isCompleted: boolean;
+  content?: string;
+  type: 'text' | 'video' | 'quiz' | 'interactive' | 'article' | 'task';
+  estimatedTime?: string;
+  isCompleted?: boolean;
   resources?: Resource[];
+  videoUrl?: string | null;
+  quiz?: LessonQuiz;
+  order?: number;
+  slug?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
 }
 
 export interface Topic {
   id: string;
   title: string;
   description: string;
-  subtopics: Subtopic[];
+  subtopics?: Subtopic[];
   estimatedTime: string;
   prerequisites?: string[];
   isUnlocked: boolean;
@@ -46,6 +63,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  summary?: string;
   instructor: string;
   thumbnail: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
@@ -75,6 +93,7 @@ export interface Lesson {
   duration: number;
   order: number;
   resources: Resource[];
+  quiz?: LessonQuiz;
 }
 
 export interface Resource {
@@ -88,19 +107,12 @@ export interface Resource {
 export interface Quiz {
   id: string;
   lessonId: string;
-  questions: Question[];
+  questions: LessonQuizQuestion[];
   passingScore: number;
   timeLimit?: number;
 }
 
-export interface Question {
-  id: string;
-  question: string;
-  type: 'multiple_choice' | 'true_false' | 'short_answer';
-  options?: string[];
-  correctAnswer: string | string[];
-  explanation?: string;
-}
+export type Question = LessonQuizQuestion;
 
 export interface UserProgress {
   courseId: string;

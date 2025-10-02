@@ -61,7 +61,7 @@ export interface ILesson {
   type: 'reading' | 'video' | 'quiz';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedMinutes: number;
-  content?: string;
+  content?: string | { html?: string };
   videoUrl?: string;
   resources?: Array<{
     title: string;
@@ -81,6 +81,7 @@ export interface ILesson {
   status: 'draft' | 'published';
   slug: string;
   createdBy?: string;
+  creditsAwarded?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
