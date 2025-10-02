@@ -31,7 +31,7 @@ import { ICourse } from "../types";
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
-  track: z.enum(["beginner", "intermediate", "advanced"]),
+  track: z.enum(["defi", "smart-contracts", "ai", "web3", "nfts"]),
   credits: z.number().min(0, "Credits must be a positive number."),
   thumbnail: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   tags: z.string().optional(),
@@ -56,7 +56,7 @@ export function CourseForm({ course }: CourseFormProps) {
     defaultValues: {
       title: course?.title || "",
       description: course?.description || "",
-      track: course?.track || "beginner",
+      track: course?.track || "defi",
       credits: course?.credits || 0,
       thumbnail: course?.thumbnail || "",
       tags: course?.tags?.join(", ") || "",
@@ -160,11 +160,16 @@ export function CourseForm({ course }: CourseFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="defi">DeFi</SelectItem>
+                  <SelectItem value="smart-contracts">Smart Contracts</SelectItem>
+                  <SelectItem value="ai">AI</SelectItem>
+                  <SelectItem value="web3">Web3</SelectItem>
+                  <SelectItem value="nfts">NFTs</SelectItem>
                 </SelectContent>
               </Select>
+              <FormDescription>
+                Choose the primary category for this course
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -40,9 +40,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get residency program courses (assuming 'beginner' track is residency)
+    // Get residency program courses (you can adjust the track filter as needed)
     const residencyCourses = await Course.find({ 
-      track: 'beginner',
       status: 'published' 
     }).sort({ order: 1 });
 

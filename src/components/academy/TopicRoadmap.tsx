@@ -225,6 +225,14 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
                 const totalLessons = topic.subtopics?.length || topic.lessons?.length || 0;
                 const completedLessons = topic.subtopics?.filter(st => st.isCompleted).length || 0;
                 
+                // Debug logging
+                console.log(`Topic "${topic.title}":`, {
+                  subtopicsLength: topic.subtopics?.length,
+                  lessonsLength: topic.lessons?.length,
+                  totalLessons,
+                  completedLessons,
+                });
+                
                 return (
                   <TopicNode
                     key={topic.id}

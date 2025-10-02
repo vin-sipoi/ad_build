@@ -4,7 +4,7 @@ import { Schema, models, model, Document, Types } from 'mongoose';
 export interface ICourse extends Document {
   title: string;
   slug: string;
-  track: 'beginner' | 'intermediate' | 'advanced';
+  track: 'defi' | 'smart-contracts' | 'ai' | 'web3' | 'nfts';
   credits: number;
   estimatedHours: number;
   order: number;
@@ -32,7 +32,7 @@ const CourseSchema = new Schema<ICourse>({
   track: { 
     type: String, 
     required: true,
-    enum: ['beginner', 'intermediate', 'advanced']
+    enum: ['defi', 'smart-contracts', 'ai', 'web3', 'nfts']
   },
   credits: { 
     type: Number, 

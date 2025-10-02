@@ -19,7 +19,7 @@ export interface ICourse {
   _id: string;
   title: string;
   description: string;
-  track: 'beginner' | 'intermediate' | 'advanced';
+  track: 'defi' | 'smart-contracts' | 'ai' | 'web3' | 'nfts';
   credits: number;
   estimatedHours: number;
   order: number;

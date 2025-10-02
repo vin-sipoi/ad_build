@@ -98,7 +98,8 @@ export async function GET(
       description: courseObj.description,
       instructor: courseObj.createdBy?.name || courseObj.createdBy?.email || 'Adamur Academy',
       thumbnail: courseObj.thumbnail || '/course-placeholder.svg',
-      difficulty: courseObj.level || courseObj.track || 'beginner',
+      difficulty: courseObj.level || 'beginner', // Use level for difficulty, not track
+      track: courseObj.track, // Add track as separate field
       duration: `${courseObj.estimatedHours || 0} hours`,
       estimatedHours: courseObj.estimatedHours || 0,
       creditsRequired: courseObj.credits || 0,
