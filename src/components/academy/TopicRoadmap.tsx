@@ -15,6 +15,8 @@ interface TopicNodeProps {
   isLocked: boolean;
   onTopicClick: (topicId: string) => void;
   index: number;
+  completedLessonsCount?: number;
+  totalLessonsCount?: number;
 }
 
 const TOPIC_GRADIENTS = [
@@ -72,13 +74,14 @@ function getTopicIcon(topic: Topic) {
   return <Play className="h-5 w-5" />;
 }
 
-function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index }: TopicNodeProps) {
+function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index, completedLessonsCount = 0, totalLessonsCount = 0 }: TopicNodeProps) {
   const getGradientVisuals = () => {
     if (isLocked) {
       return {
         card: 'bg-gray-900/40 border-gray-700 text-gray-400',
         icon: 'bg-gray-700 text-gray-400',
         arrow: 'text-gray-500',
+        progress: 'bg-gray-600 text-gray-300',
         extra: '',
       };
     }
@@ -88,6 +91,7 @@ function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index }: TopicN
         card: 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/15 to-emerald-400/25 border-emerald-400/60 text-emerald-50 shadow-[0_14px_45px_-15px_rgba(16,185,129,0.65)]',
         icon: 'bg-emerald-500/30 text-emerald-100',
         arrow: 'text-emerald-100',
+        progress: 'bg-emerald-500/30 text-emerald-100',
         extra: 'ring-1 ring-emerald-400/40',
       };
     }
@@ -97,11 +101,13 @@ function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index }: TopicN
       card: `bg-gradient-to-r ${palette.card} ${palette.border} text-white/90 ${palette.shadow}`,
       icon: palette.icon,
       arrow: palette.arrow,
+      progress: `${palette.icon.replace('text-', 'text-')}`,
       extra: 'ring-1 ring-white/5',
     };
   };
 
   const visuals = getGradientVisuals();
+  const progressPercentage = totalLessonsCount > 0 ? Math.round((completedLessonsCount / totalLessonsCount) * 100) : 0;
 
   return (
     <div
@@ -113,6 +119,13 @@ function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index }: TopicN
         <p className="text-sm text-white/80 line-clamp-2">{topic.description}</p>
       </div>
       <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+        {/* Progress Badge */}
+        {totalLessonsCount > 0 && (
+          <div className={`px-3 py-1.5 rounded-full ${visuals.progress} backdrop-blur-sm flex items-center gap-1.5`}>
+            <span className="text-xs font-semibold">{completedLessonsCount}/{totalLessonsCount}</span>
+            <span className="text-xs opacity-80">({progressPercentage}%)</span>
+          </div>
+        )}
         <div className={`p-2 rounded-full ${visuals.icon}`}>
           {getTopicIcon(topic)}
         </div>
@@ -207,16 +220,24 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
         {topics.length > 0 ? (
           <div className="relative">
             <div className="w-full space-y-4">
-              {topics.map((topic, index) => (
-                <TopicNode
-                  key={topic.id}
-                  topic={topic}
-                  isCompleted={isTopicCompleted(topic.id)}
-                  isLocked={isTopicLocked(index)}
-                  onTopicClick={handleTopicClick}
-                  index={index}
-                />
-              ))}
+              {topics.map((topic, index) => {
+                // Calculate lesson progress for this topic
+                const totalLessons = topic.subtopics?.length || topic.lessons?.length || 0;
+                const completedLessons = topic.subtopics?.filter(st => st.isCompleted).length || 0;
+                
+                return (
+                  <TopicNode
+                    key={topic.id}
+                    topic={topic}
+                    isCompleted={isTopicCompleted(topic.id)}
+                    isLocked={isTopicLocked(index)}
+                    onTopicClick={handleTopicClick}
+                    index={index}
+                    completedLessonsCount={completedLessons}
+                    totalLessonsCount={totalLessons}
+                  />
+                );
+              })}
             </div>
           </div>
         ) : (
