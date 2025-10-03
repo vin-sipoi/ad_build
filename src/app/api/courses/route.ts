@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import { Course } from '@/models/Course';
 import { Topic } from '@/models/Topic';
+import { Lesson } from '@/models/Lesson';
 
 export async function GET() {
   try {
@@ -11,8 +12,10 @@ export async function GET() {
       .populate('createdBy', 'name email')
       .sort({ order: 1, createdAt: -1 });
 
-    // Get topic counts for each course
+    // Get topic counts and lesson times for each course
     const courseIds = courses.map(c => c._id);
+    
+    // Get topic counts
     const topicCounts = await Topic.aggregate([
       { 
         $match: { 
@@ -28,9 +31,45 @@ export async function GET() {
       }
     ]);
 
-    // Create a map for quick lookup
+    // Get total lesson time per course
+    const lessonTimes = await Lesson.aggregate([
+      {
+        $match: {
+          status: 'published'
+        }
+      },
+      {
+        $lookup: {
+          from: 'topics',
+          localField: 'topicId',
+          foreignField: '_id',
+          as: 'topic'
+        }
+      },
+      {
+        $unwind: '$topic'
+      },
+      {
+        $match: {
+          'topic.courseId': { $in: courseIds },
+          'topic.status': 'published'
+        }
+      },
+      {
+        $group: {
+          _id: '$topic.courseId',
+          totalMinutes: { $sum: '$estimatedMinutes' }
+        }
+      }
+    ]);
+
+    // Create maps for quick lookup
     const topicCountMap = new Map(
       topicCounts.map(tc => [tc._id.toString(), tc.count])
+    );
+    
+    const lessonTimeMap = new Map(
+      lessonTimes.map(lt => [lt._id.toString(), lt.totalMinutes])
     );
 
     // Transform to match the expected format for learners
@@ -38,6 +77,10 @@ export async function GET() {
       const courseObj = course.toObject();
       const courseIdStr = courseObj._id.toString();
       const topicCount = topicCountMap.get(courseIdStr) || 0;
+      
+      // Calculate total hours from lesson minutes
+      const totalMinutes = lessonTimeMap.get(courseIdStr) || 0;
+      const totalHours = Math.ceil(totalMinutes / 60); // Round up to nearest hour
 
       return {
         _id: courseObj._id,
@@ -48,8 +91,8 @@ export async function GET() {
         thumbnail: courseObj.thumbnail || '/course-placeholder.svg',
         difficulty: courseObj.level || 'beginner',
         track: courseObj.track,
-        duration: `${courseObj.estimatedHours || 0} hours`,
-        estimatedHours: courseObj.estimatedHours || 0,
+        duration: `${totalHours} hours`,
+        estimatedHours: totalHours,
         creditsRequired: courseObj.credits || 0,
         creditsReward: 100,
         creditReward: 100, // backward compatibility
