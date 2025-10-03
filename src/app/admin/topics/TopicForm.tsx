@@ -29,7 +29,6 @@ const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   summary: z.string().min(10, "Summary must be at least 10 characters."),
   courseId: z.string().min(1, "Please select a course."),
-  estimatedMinutes: z.number().min(0, "Estimated minutes must be a positive number."),
   order: z.number().min(0, "Order must be a positive number."),
   status: z.enum(["draft", "published"]),
   slug: z.string().min(1, "Slug is required."),
@@ -50,7 +49,6 @@ export function TopicForm({ topic, courses }: TopicFormProps) {
       title: topic?.title || "",
       summary: topic?.summary || "",
       courseId: typeof topic?.courseId === 'object' ? topic.courseId._id : topic?.courseId || "",
-      estimatedMinutes: topic?.estimatedMinutes || 0,
       order: topic?.order || 0,
       status: topic?.status || "draft",
       slug: topic?.slug || "",
@@ -63,12 +61,11 @@ export function TopicForm({ topic, courses }: TopicFormProps) {
         title: values.title,
         summary: values.summary,
         courseId: values.courseId,
-        estimatedMinutes: values.estimatedMinutes,
+        estimatedMinutes: 0, // Will be calculated from lessons
         order: values.order,
         status: values.status,
         slug,
     };
-
     try {
         if (isEditing) {
             await updateTopic(topic._id, topicData);
@@ -152,25 +149,6 @@ export function TopicForm({ topic, courses }: TopicFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="estimatedMinutes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estimated Minutes</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

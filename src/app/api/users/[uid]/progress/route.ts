@@ -58,6 +58,9 @@ export async function GET(
       );
     }
 
+    // Get enrolled courses from user.myPath
+    const enrolledCourseIds = user.myPath || [];
+    
     // Fetch user progress records using MongoDB User ObjectId
     const userProgressRecords = await Progress.find({ userId: user._id })
       .populate({
@@ -66,7 +69,20 @@ export async function GET(
       })
       .lean();
 
-    if (!userProgressRecords || userProgressRecords.length === 0) {
+    // Create a Set of all courseIds to process (enrolled courses + courses with progress)
+    const allCourseIds = new Set<string>();
+    
+    // Add enrolled courses
+    enrolledCourseIds.forEach((id: string) => allCourseIds.add(id.toString()));
+    
+    // Add courses with progress records
+    userProgressRecords.forEach((progress) => {
+      if (progress.courseId && progress.courseId._id) {
+        allCourseIds.add(progress.courseId._id.toString());
+      }
+    });
+
+    if (allCourseIds.size === 0) {
       return NextResponse.json({
         courses: [],
         stats: {
@@ -82,20 +98,27 @@ export async function GET(
     // Group progress by course
     const courseProgressMap = new Map();
     
+    // Initialize map with all enrolled courses
+    for (const courseId of allCourseIds) {
+      const course = await Course.findById(courseId).select('title slug').lean() as { title: string; slug: string } | null;
+      if (!course) continue;
+      
+      courseProgressMap.set(courseId, {
+        courseId: courseId,
+        courseTitle: course.title,
+        courseSlug: course.slug,
+        progressRecords: [],
+        totalCreditsEarned: 0,
+        totalTimeSpent: 0,
+        lastAccessed: null
+      });
+    }
+    
+    // Add progress records to the map
     for (const progress of userProgressRecords) {
       const courseId = progress.courseId._id.toString();
       
-      if (!courseProgressMap.has(courseId)) {
-        courseProgressMap.set(courseId, {
-          courseId: courseId,
-          courseTitle: progress.courseId.title,
-          courseSlug: progress.courseId.slug,
-          progressRecords: [],
-          totalCreditsEarned: 0,
-          totalTimeSpent: 0,
-          lastAccessed: progress.updatedAt
-        });
-      }
+      if (!courseProgressMap.has(courseId)) continue;
       
       const courseData = courseProgressMap.get(courseId);
       courseData.progressRecords.push(progress);
@@ -103,7 +126,7 @@ export async function GET(
       courseData.totalTimeSpent += progress.timeSpent || 0;
       
       // Update last accessed if this record is more recent
-      if (progress.updatedAt > courseData.lastAccessed) {
+      if (!courseData.lastAccessed || progress.updatedAt > courseData.lastAccessed) {
         courseData.lastAccessed = progress.updatedAt;
       }
     }
@@ -168,7 +191,7 @@ export async function GET(
         completedLessons,
         timeSpent: courseData.totalTimeSpent,
         creditsEarned: courseData.totalCreditsEarned,
-        lastAccessed: courseData.lastAccessed,
+        lastAccessed: courseData.lastAccessed || new Date(), // Use current date for newly enrolled courses
         progress: Math.round(progress),
         topics: topicProgress
       });

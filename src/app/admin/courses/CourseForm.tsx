@@ -35,7 +35,6 @@ const formSchema = z.object({
   credits: z.number().min(0, "Credits must be a positive number."),
   thumbnail: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   tags: z.string().optional(),
-  estimatedHours: z.number().min(0, "Estimated hours must be a positive number."),
   status: z.enum(["draft", "published"]),
   slug: z.string().min(1, "Slug is required."),
 });
@@ -60,7 +59,6 @@ export function CourseForm({ course }: CourseFormProps) {
       credits: course?.credits || 0,
       thumbnail: course?.thumbnail || "",
       tags: course?.tags?.join(", ") || "",
-      estimatedHours: course?.estimatedHours || 0,
       status: course?.status || "draft",
       slug: course?.slug || "",
     },
@@ -74,7 +72,7 @@ export function CourseForm({ course }: CourseFormProps) {
         description: values.description,
         track: values.track,
         credits: values.credits,
-        estimatedHours: values.estimatedHours,
+        estimatedHours: 0, // Will be calculated from lessons
         status: values.status,
         thumbnail: values.thumbnail || undefined,
         tags: values.tags?.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag) || [],
@@ -199,24 +197,6 @@ export function CourseForm({ course }: CourseFormProps) {
               <FormDescription>
                 Enter tags separated by commas.
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="estimatedHours"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estimated Hours</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

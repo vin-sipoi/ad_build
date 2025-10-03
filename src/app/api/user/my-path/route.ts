@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth-utils';
 import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
+import { adminAuth } from '@/lib/firebase-admin';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession(request);
-    if (!session || !session.user) {
+    // Get Firebase ID token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    const idToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+    if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify the Firebase ID token
+    let firebaseUser;
+    try {
+      if (!adminAuth) {
+        return NextResponse.json(
+          { error: 'Firebase admin not initialized' },
+          { status: 500 }
+        );
+      }
+      firebaseUser = await adminAuth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error('Error verifying Firebase token:', error);
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const { courseId } = await request.json();
@@ -17,11 +37,26 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const user = await User.findById(session.user.id);
+    // Find user by email from Firebase, or create if doesn't exist
+    let user = await User.findOne({ email: firebaseUser.email });
+    
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      // Auto-create user if they authenticated via Firebase but don't exist in MongoDB yet
+      user = await User.create({
+        email: firebaseUser.email,
+        name: firebaseUser.name || firebaseUser.email?.split('@')[0] || 'User',
+        roles: ['learner'],
+        myPath: [courseId], // Add the course to their path immediately
+        profile: {},
+      });
+      
+      return NextResponse.json({ 
+        message: 'User created and course added to My Path',
+        newUser: true 
+      });
     }
 
+    // User exists, add course if not already in myPath
     const currentPath = Array.isArray(user.myPath) ? [...user.myPath] : [];
     if (!Array.isArray(user.myPath)) {
       user.myPath = currentPath;
@@ -36,6 +71,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'Course added to My Path' });
   } catch (error) {
     console.error('Error in POST /api/user/my-path:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ 
+      error: 'Internal Server Error', 
+      details: errorMessage 
+    }, { status: 500 });
   }
 }

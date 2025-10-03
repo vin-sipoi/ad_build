@@ -17,7 +17,18 @@ export default function CourseDetailPage() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`/api/courses/${params.courseId}`);
+        // Get Firebase auth token
+        const { auth } = await import('@/lib/firebase');
+        const { getIdToken } = await import('firebase/auth');
+        const user = auth.currentUser;
+        
+        const headers: HeadersInit = {};
+        if (user) {
+          const idToken = await getIdToken(user);
+          headers.Authorization = `Bearer ${idToken}`;
+        }
+
+        const response = await fetch(`/api/courses/${params.courseId}`, { headers });
         if (response.ok) {
           const courseData = await response.json();
           setCourse(courseData);

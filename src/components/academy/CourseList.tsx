@@ -78,10 +78,23 @@ export function CourseList() {
 
     setIsStartingCourse(true);
     try {
+      // Get Firebase auth token
+      const { auth } = await import('@/lib/firebase');
+      const { getIdToken } = await import('firebase/auth');
+      const user = auth.currentUser;
+      
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      const idToken = await getIdToken(user);
+
       const response = await fetch('/api/user/my-path', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ courseId: selectedCourse.id || selectedCourse._id }),
       });

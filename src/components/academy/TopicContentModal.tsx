@@ -152,11 +152,23 @@ export function TopicContentModal({
     setIsSubmittingQuiz(true);
 
     try {
+      // Get Firebase auth token
+      const { auth } = await import('@/lib/firebase');
+      const { getIdToken } = await import('firebase/auth');
+      const user = auth.currentUser;
+      
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (user) {
+        const idToken = await getIdToken(user);
+        headers.Authorization = `Bearer ${idToken}`;
+      }
+
       const response = await fetch("/api/progress/lessons", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           courseId,
           topicId: topic.id,
@@ -225,10 +237,6 @@ export function TopicContentModal({
                   : "No lessons yet"}
                 {topic.estimatedTime ? ` • ${topic.estimatedTime}` : ""}
               </p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm font-medium">Progress</div>
-              <div className="text-xs text-muted-foreground">{Math.round(progress)}%</div>
             </div>
           </div>
           <Progress value={progress} className="mt-4 h-2" />

@@ -4,6 +4,10 @@ import { dbConnect } from '@/lib/db';
 import { Course } from '@/models/Course';
 import { Topic } from '@/models/Topic';
 import { Lesson, type ILessonQuizQuestion } from '@/models/Lesson';
+import { Progress } from '@/models/Progress';
+import { User } from '@/models/User';
+import { getSession } from '@/lib/auth-utils';
+import { adminAuth } from '@/lib/firebase-admin';
 
 export async function GET(
   req: NextRequest,
@@ -14,12 +18,61 @@ export async function GET(
   try {
     await dbConnect();
     
-    // Get course
-    const course = await Course.findById(courseId)
-      .populate('createdBy', 'name email');
+    // Get course by ID or slug (without populate first to avoid errors)
+    let course = await Course.findById(courseId).catch(() => null);
+    
+    if (!course) {
+      // Try finding by slug if ID lookup failed
+      course = await Course.findOne({ slug: courseId });
+    }
 
     if (!course) {
-      return NextResponse.json({ error: `Course with id ${courseId} not found` }, { status: 404 });
+      return NextResponse.json({ error: `Course with id/slug ${courseId} not found` }, { status: 404 });
+    }
+    
+    // Try to populate createdBy, but don't fail if it doesn't exist
+    try {
+      await course.populate('createdBy', 'name email');
+    } catch (populateError) {
+      console.log('Could not populate createdBy:', populateError);
+    }
+
+    // Get authenticated user to fetch their progress
+    let userId = null;
+    try {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader?.startsWith('Bearer ') && adminAuth) {
+        const token = authHeader.split(' ')[1];
+        const decoded = await adminAuth.verifyIdToken(token);
+        if (decoded?.email) {
+          const user = await User.findOne({ email: decoded.email.toLowerCase() });
+          if (user) userId = user._id;
+        }
+      }
+      
+      if (!userId) {
+        const session = await getSession(req);
+        if (session?.user?.id) {
+          const user = await User.findById(session.user.id);
+          if (user) userId = user._id;
+        }
+      }
+    } catch (error) {
+      console.log('Could not authenticate user for progress tracking:', error);
+    }
+
+    // Fetch user's progress if authenticated
+    const userProgressMap = new Map();
+    if (userId) {
+      const progressRecords = await Progress.find({
+        userId,
+        courseId,
+        status: 'completed'
+      }).select('lessonId');
+      
+      progressRecords.forEach(record => {
+        userProgressMap.set(record.lessonId.toString(), true);
+      });
     }
 
     // Get topics for this course
@@ -58,8 +111,11 @@ export async function GET(
               }
             : undefined;
 
+          const lessonId = String(lesson._id);
+          const isLessonCompleted = userProgressMap.has(lessonId);
+
           return {
-            id: String(lesson._id),
+            id: lessonId,
             title: lesson.title,
             slug: lesson.slug,
             description: lesson.description || '',
@@ -69,12 +125,15 @@ export async function GET(
             videoUrl: lesson.videoUrl || null,
             content: lessonContent,
             estimatedTime: `${lesson.estimatedMinutes || 0} min`,
-            isCompleted: false, // TODO: Add user progress tracking
+            isCompleted: isLessonCompleted,
             isLocked: false, // TODO: Add lesson progression logic
             order: lesson.order,
             quiz: quizData,
           };
         });
+
+        // Check if all lessons in this topic are completed
+        const topicCompleted = lessonSummaries.length > 0 && lessonSummaries.every(l => l.isCompleted);
 
         return {
           id: String(topic._id),
@@ -82,7 +141,7 @@ export async function GET(
           slug: topic.slug,
           description: topic.description || '',
           order: topic.order,
-          isCompleted: false, // TODO: Add user progress tracking
+          isCompleted: topicCompleted,
           lessons: lessonSummaries,
           subtopics: lessonSummaries,
         };
@@ -123,13 +182,17 @@ export async function GET(
 
     return NextResponse.json(transformedCourse);
   } catch (error) {
-    console.error(`Error fetching course:`, error);
+    console.error(`Error fetching course with id/slug "${courseId}":`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error('Error details:', { message: errorMessage, stack: errorStack });
     
     // Fallback to static data if database fails
     try {
       const coursesModule = await import('@/data/courses');
       const course = coursesModule.courses.find((c: { id: string }) => c.id === courseId);
       if (course) {
+        console.log('Using fallback static data for course:', courseId);
         return NextResponse.json(course);
       }
     } catch (fallbackError) {
@@ -137,7 +200,7 @@ export async function GET(
     }
     
     return NextResponse.json(
-      { error: 'Failed to fetch course' },
+      { error: 'Failed to fetch course', details: errorMessage },
       { status: 500 }
     );
   }
