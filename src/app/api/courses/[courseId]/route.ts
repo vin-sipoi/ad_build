@@ -16,19 +16,35 @@ export async function GET(
   const { courseId } = await params;
   
   try {
+    console.log('🔍 [Course API] Fetching course with id/slug:', courseId);
     await dbConnect();
+    console.log('✅ [Course API] Database connected');
     
     // Get course by ID or slug (without populate first to avoid errors)
-    let course = await Course.findById(courseId).catch(() => null);
+    let course = await Course.findById(courseId).catch((err) => {
+      console.log('⚠️ [Course API] findById failed (expected if using slug):', err.message);
+      return null;
+    });
     
     if (!course) {
+      console.log('🔍 [Course API] Trying to find by slug:', courseId);
       // Try finding by slug if ID lookup failed
       course = await Course.findOne({ slug: courseId });
+      console.log('📊 [Course API] Found by slug:', course ? 'YES' : 'NO');
+    } else {
+      console.log('✅ [Course API] Found by ID');
     }
 
     if (!course) {
+      console.error('❌ [Course API] Course not found in database:', courseId);
       return NextResponse.json({ error: `Course with id/slug ${courseId} not found` }, { status: 404 });
     }
+    
+    console.log('✅ [Course API] Course found:', course.title);
+    
+    // Get the actual MongoDB ObjectId of the course (important for querying Progress)
+    const courseObjectId = course._id;
+    console.log('📌 [Course API] Course ObjectId:', courseObjectId);
     
     // Try to populate createdBy, but don't fail if it doesn't exist
     try {
@@ -62,23 +78,30 @@ export async function GET(
     }
 
     // Fetch user's progress if authenticated
+    // IMPORTANT: Use courseObjectId (MongoDB ObjectId) not courseId (which might be a slug)
     const userProgressMap = new Map();
     if (userId) {
+      console.log('🔍 [Course API] Fetching progress for userId:', userId, 'courseId:', courseObjectId);
       const progressRecords = await Progress.find({
         userId,
-        courseId,
+        courseId: courseObjectId, // Use ObjectId here, not the slug
         status: 'completed'
       }).select('lessonId');
       
+      console.log('📊 [Course API] Found', progressRecords.length, 'completed progress records');
       progressRecords.forEach(record => {
         userProgressMap.set(record.lessonId.toString(), true);
       });
     }
 
     // Get topics for this course
-    const topics = await Topic.find({ courseId: courseId, status: 'published' })
+    // Use courseObjectId (MongoDB ObjectId) for querying, not the slug
+    console.log('🔍 [Course API] Fetching topics for courseId:', courseObjectId);
+    const topics = await Topic.find({ courseId: courseObjectId, status: 'published' })
       .sort({ order: 1 })
       .lean();
+    
+    console.log('📊 [Course API] Found', topics.length, 'published topics');
 
     // Get lessons for each topic
     const topicsWithLessons = await Promise.all(
@@ -180,12 +203,13 @@ export async function GET(
       updatedAt: courseObj.updatedAt,
     };
 
+    console.log('✅ [Course API] Returning course data with', topicsWithLessons.length, 'topics');
     return NextResponse.json(transformedCourse);
   } catch (error) {
-    console.error(`Error fetching course with id/slug "${courseId}":`, error);
+    console.error(`❌ [Course API] Error fetching course with id/slug "${courseId}":`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : '';
-    console.error('Error details:', { message: errorMessage, stack: errorStack });
+    console.error('📋 [Course API] Error details:', { message: errorMessage, stack: errorStack });
     
     // Fallback to static data if database fails
     try {

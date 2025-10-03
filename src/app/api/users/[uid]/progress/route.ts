@@ -6,6 +6,7 @@ import { Topic } from '@/models/Topic';
 import { Lesson } from '@/models/Lesson';
 import { User } from '@/models/User';
 import { adminAuth } from '@/lib/firebase-admin';
+import mongoose from 'mongoose';
 
 export async function GET(
   request: NextRequest,
@@ -72,8 +73,14 @@ export async function GET(
     // Create a Set of all courseIds to process (enrolled courses + courses with progress)
     const allCourseIds = new Set<string>();
     
-    // Add enrolled courses
-    enrolledCourseIds.forEach((id: string) => allCourseIds.add(id.toString()));
+    // Add enrolled courses - only if they are valid ObjectIds
+    enrolledCourseIds.forEach((id: string) => {
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        allCourseIds.add(id.toString());
+      } else {
+        console.warn(`⚠️ Invalid course ID in user.myPath: ${id}`);
+      }
+    });
     
     // Add courses with progress records
     userProgressRecords.forEach((progress) => {
@@ -100,13 +107,20 @@ export async function GET(
     
     // Initialize map with all enrolled courses
     for (const courseId of allCourseIds) {
-      const course = await Course.findById(courseId).select('title slug').lean() as { title: string; slug: string } | null;
-      if (!course) continue;
+      const course = await Course.findById(courseId).select('title slug _id').lean() as { _id: mongoose.Types.ObjectId; title: string; slug?: string } | null;
+      if (!course) {
+        console.warn(`⚠️ Course not found for ID: ${courseId}`);
+        continue;
+      }
+      
+      // Use _id as fallback if slug is missing
+      const courseSlug = course.slug || course._id.toString();
+      console.log(`📊 Course: "${course.title}", slug: "${courseSlug}"`);
       
       courseProgressMap.set(courseId, {
         courseId: courseId,
         courseTitle: course.title,
-        courseSlug: course.slug,
+        courseSlug: courseSlug,
         progressRecords: [],
         totalCreditsEarned: 0,
         totalTimeSpent: 0,

@@ -69,6 +69,36 @@ export default function MyJourneyPage() {
             coursesStarted: 0,
             coursesCompleted: 0
           });
+        } else if (response.status === 500) {
+          // If there's a server error (likely invalid course IDs), try to clean up
+          console.warn('Server error fetching progress. Attempting cleanup...');
+          
+          // Try to clean up invalid course IDs
+          try {
+            const token = await user.getIdToken();
+            await fetch('/api/user/cleanup-path', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+            
+            // Retry fetching progress after cleanup
+            const retryResponse = await fetch(`/api/users/${user.uid}/progress`);
+            if (retryResponse.ok) {
+              const data = await retryResponse.json();
+              setUserProgress(data.courses || []);
+              setUserStats(data.stats || {
+                totalProgress: 0,
+                totalCreditsEarned: 0,
+                totalTimeSpent: 0,
+                coursesStarted: 0,
+                coursesCompleted: 0
+              });
+            }
+          } catch (cleanupError) {
+            console.error('Error during cleanup:', cleanupError);
+          }
         }
       } catch (error) {
         console.error('Error fetching user progress:', error);

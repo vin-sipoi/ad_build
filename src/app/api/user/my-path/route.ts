@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
+import { Course } from '@/models/Course';
 import { adminAuth } from '@/lib/firebase-admin';
+import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +37,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
     }
 
+    // Validate courseId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return NextResponse.json({ error: 'Invalid course ID format' }, { status: 400 });
+    }
+
     await connectDB();
+
+    // Verify course exists
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
 
     // Find user by email from Firebase, or create if doesn't exist
     let user = await User.findOne({ email: firebaseUser.email });

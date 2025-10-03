@@ -59,7 +59,7 @@ export async function dbConnect(): Promise<typeof mongoose> {
     console.log('🔄 Attempting MongoDB connection to:', MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
     
     const opts = {
-      bufferCommands: false,
+      bufferCommands: true, // Changed to true to prevent errors before connection is complete
       serverSelectionTimeoutMS: 30000, // Increased to 30 seconds
       socketTimeoutMS: 30000, // Increased to 30 seconds
       connectTimeoutMS: 30000, // Increased to 30 seconds
