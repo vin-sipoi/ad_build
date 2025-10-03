@@ -1,6 +1,8 @@
 export interface LessonSummary {
   id: string;
   title: string;
+  isCompleted?: boolean;
+  type?: 'text' | 'video' | 'quiz' | 'interactive' | 'article' | 'task';
   // Add other lesson properties as needed
 }
 // Academy and Learning Types - Roadmap Structure

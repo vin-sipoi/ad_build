@@ -3,20 +3,17 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   BookOpen,
   Clock,
   Trophy,
-  CheckCircle,
-  PlayCircle,
-  Lock,
   GraduationCap,
   BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { JourneyCourseCard } from '@/components/academy/JourneyCourseCard';
 
 interface UserProgress {
   courseId: string;
@@ -236,80 +233,11 @@ export default function MyJourneyPage() {
             </CardContent>
           </Card>
         ) : (
-          userProgress.map((course) => (
-            <Card key={course.courseId}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl">{course.courseTitle}</CardTitle>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <span className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {formatTime(course.timeSpent)}
-                      </span>
-                      <span className="flex items-center">
-                        <Trophy className="h-4 w-4 mr-1" />
-                        {course.creditsEarned} credits
-                      </span>
-                      <span>
-                        Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <Badge variant={course.progress === 100 ? "default" : "secondary"}>
-                    {course.progress.toFixed(0)}% Complete
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Course Progress</span>
-                    <span>{course.completedLessons}/{course.totalLessons} lessons</span>
-                  </div>
-                  <Progress value={course.progress} className="h-2" />
-                </div>
-
-                {/* Topics Progress */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">Topics Progress</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {course.topics.map((topic) => (
-                      <div
-                        key={topic.topicId}
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-2">
-                          {topic.completed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : topic.lessonsCompleted > 0 ? (
-                            <PlayCircle className="h-4 w-4 text-blue-500" />
-                          ) : (
-                            <Lock className="h-4 w-4 text-muted-foreground" />
-                          )}
-                          <span className="text-sm font-medium">{topic.title}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {topic.lessonsCompleted}/{topic.totalLessons}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-4 border-t">
-                  <div className="text-sm text-muted-foreground">
-                    {course.completedTopics}/{course.totalTopics} topics completed
-                  </div>
-                  <Link href={`/dashboard/academy/${course.courseSlug}`}>
-                    <Button size="sm">
-                      {course.progress === 100 ? 'Review Course' : 'Continue Learning'}
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {userProgress.map((course) => (
+              <JourneyCourseCard key={course.courseId} course={course} />
+            ))}
+          </div>
         )}
       </div>
     </div>

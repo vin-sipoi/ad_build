@@ -9,10 +9,13 @@ import { Search } from 'lucide-react';
 import { CourseCard } from './CourseCard';
 import { CourseModal } from './CourseModal';
 import { Course } from '@/types/academy';
+import { useAuth } from '@/hooks/useAuth';
 
 export function CourseList() {
   const router = useRouter();
+  const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(new Set());
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +28,20 @@ export function CourseList() {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+    if (user) {
+      fetchEnrolledCourses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     let filtered = courses;
+
+    // Filter out enrolled courses
+    filtered = filtered.filter(course => {
+      const courseId = course._id?.toString() || course.id;
+      return !enrolledCourseIds.has(courseId);
+    });
 
     if (searchTerm) {
       filtered = filtered.filter(course =>
@@ -46,7 +59,24 @@ export function CourseList() {
     }
 
     setFilteredCourses(filtered);
-  }, [courses, searchTerm, selectedTrack]);
+  }, [courses, searchTerm, selectedTrack, enrolledCourseIds]);
+
+  const fetchEnrolledCourses = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch(`/api/users/${user.uid}/progress`);
+      if (response.ok) {
+        const data = await response.json();
+        const enrolledIds = new Set<string>(
+          (data.courses || []).map((c: { courseId: string }) => c.courseId)
+        );
+        setEnrolledCourseIds(enrolledIds);
+      }
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -110,6 +140,9 @@ export function CourseList() {
         console.error('Failed to add course to My Journey', responseBody);
         return;
       }
+
+      // Refresh enrolled courses to update the list
+      await fetchEnrolledCourses();
 
       setIsModalOpen(false);
       router.push(`/dashboard/academy/${selectedCourse.id || selectedCourse._id}`);

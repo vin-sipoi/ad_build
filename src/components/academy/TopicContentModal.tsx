@@ -27,6 +27,7 @@ interface TopicContentModalProps {
   allTopics: Topic[];
   onTopicChange: (topicId: string) => void;
   courseId: string;
+  onProgressUpdate?: () => void | Promise<void>;
 }
 
 export function TopicContentModal({
@@ -36,6 +37,7 @@ export function TopicContentModal({
   allTopics,
   onTopicChange,
   courseId,
+  onProgressUpdate,
 }: TopicContentModalProps) {
   const [currentSubtopicIndex, setCurrentSubtopicIndex] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
@@ -189,12 +191,24 @@ export function TopicContentModal({
         throw new Error((data as { error?: string }).error || "Failed to save progress");
       }
 
+      const responseData = await response.json();
+      console.log('✅ Quiz submitted successfully:', responseData);
+
       if (passed) {
         setCompletedLessons((previous) => {
           const updated = new Set(previous);
           updated.add(currentSubtopic.id);
           return updated;
         });
+        
+        // Refresh the course data to update progress
+        console.log('🔄 Refreshing course data after quiz completion...');
+        if (onProgressUpdate) {
+          await onProgressUpdate();
+          console.log('✅ Course data refreshed');
+        } else {
+          console.warn('⚠️ onProgressUpdate callback not provided');
+        }
       }
     } catch (error) {
       console.error("Error submitting quiz:", error);

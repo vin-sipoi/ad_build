@@ -14,37 +14,48 @@ export default function CourseDetailPage() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        // Get Firebase auth token
-        const { auth } = await import('@/lib/firebase');
-        const { getIdToken } = await import('firebase/auth');
-        const user = auth.currentUser;
-        
-        const headers: HeadersInit = {};
-        if (user) {
-          const idToken = await getIdToken(user);
-          headers.Authorization = `Bearer ${idToken}`;
-        }
-
-        const response = await fetch(`/api/courses/${params.courseId}`, { headers });
-        if (response.ok) {
-          const courseData = await response.json();
-          setCourse(courseData);
-        } else {
-          console.error('Failed to load course');
-        }
-      } catch (error) {
-        console.error('Error fetching course:', error);
-      } finally {
-        setLoading(false);
+  const fetchCourse = async () => {
+    try {
+      console.log('🔄 Fetching course data...');
+      // Get Firebase auth token
+      const { auth } = await import('@/lib/firebase');
+      const { getIdToken } = await import('firebase/auth');
+      const user = auth.currentUser;
+      
+      const headers: HeadersInit = {};
+      if (user) {
+        const idToken = await getIdToken(user);
+        headers.Authorization = `Bearer ${idToken}`;
       }
-    };
 
+      const response = await fetch(`/api/courses/${params.courseId}`, { headers });
+      if (response.ok) {
+        const courseData = await response.json();
+        console.log('✅ Course data received:', {
+          title: courseData.title,
+          totalTopics: courseData.modules?.[0]?.topics?.length,
+          topicsWithProgress: courseData.modules?.[0]?.topics?.map((t: { title: string; lessons: { isCompleted: boolean }[] }) => ({
+            title: t.title,
+            completedLessons: t.lessons?.filter((l: { isCompleted: boolean }) => l.isCompleted).length,
+            totalLessons: t.lessons?.length
+          }))
+        });
+        setCourse(courseData);
+      } else {
+        console.error('Failed to load course');
+      }
+    } catch (error) {
+      console.error('Error fetching course:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (params.courseId) {
       fetchCourse();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.courseId]);
 
   const handleTopicClick = (topicId: string) => {
@@ -143,6 +154,7 @@ export default function CourseDetailPage() {
           allTopics={allTopics}
           onTopicChange={handleTopicChange}
           courseId={course.id}
+          onProgressUpdate={fetchCourse}
         />
       )}
     </div>

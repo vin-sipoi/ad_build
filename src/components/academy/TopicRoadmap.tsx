@@ -112,13 +112,13 @@ function TopicNode({ topic, isCompleted, isLocked, onTopicClick, index, complete
   return (
     <div
       onClick={() => !isLocked && onTopicClick(topic.id)}
-      className={`w-full flex items-center p-4 rounded-xl border transition-all duration-300 group ${visuals.card} ${visuals.extra} ${!isLocked ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl' : 'cursor-not-allowed'}`}
+      className={`w-full flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 p-4 rounded-xl border transition-all duration-300 group ${visuals.card} ${visuals.extra} ${!isLocked ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl' : 'cursor-not-allowed'}`}
     >
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-white truncate">{topic.title}</h3>
-        <p className="text-sm text-white/80 line-clamp-2">{topic.description}</p>
+        <h3 className="font-semibold text-white break-words line-clamp-2 sm:line-clamp-1">{topic.title}</h3>
+        <p className="text-sm text-white/80 line-clamp-2 mt-1">{topic.description}</p>
       </div>
-      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+      <div className="flex items-center gap-3 sm:ml-4 flex-shrink-0 self-end sm:self-auto">
         {/* Progress Badge */}
         {totalLessonsCount > 0 && (
           <div className={`px-3 py-1.5 rounded-full ${visuals.progress} backdrop-blur-sm flex items-center gap-1.5`}>
@@ -222,8 +222,10 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
             <div className="w-full space-y-4">
               {topics.map((topic, index) => {
                 // Calculate lesson progress for this topic
-                const totalLessons = topic.subtopics?.length || topic.lessons?.length || 0;
-                const completedLessons = topic.subtopics?.filter(st => st.isCompleted).length || 0;
+                // Check both subtopics and lessons arrays (they might be the same data with different names)
+                const lessonsArray = topic.lessons || topic.subtopics || [];
+                const totalLessons = lessonsArray.length;
+                const completedLessons = lessonsArray.filter(lesson => lesson.isCompleted).length;
                 
                 // Debug logging
                 console.log(`Topic "${topic.title}":`, {
@@ -231,6 +233,10 @@ export function TopicRoadmap({ course, onTopicClick }: TopicRoadmapProps) {
                   lessonsLength: topic.lessons?.length,
                   totalLessons,
                   completedLessons,
+                  lessonsArray: lessonsArray.map(l => ({
+                    title: l.title,
+                    isCompleted: l.isCompleted
+                  }))
                 });
                 
                 return (

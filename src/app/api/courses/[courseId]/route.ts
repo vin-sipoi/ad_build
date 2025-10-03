@@ -86,12 +86,14 @@ export async function GET(
         userId,
         courseId: courseObjectId, // Use ObjectId here, not the slug
         status: 'completed'
-      }).select('lessonId');
+      }).select('lessonId status completedAt');
       
       console.log('📊 [Course API] Found', progressRecords.length, 'completed progress records');
       progressRecords.forEach(record => {
+        console.log('  ✅ Lesson completed:', record.lessonId.toString(), 'at', record.completedAt);
         userProgressMap.set(record.lessonId.toString(), true);
       });
+      console.log('📊 [Course API] userProgressMap has', userProgressMap.size, 'entries');
     }
 
     // Get topics for this course
@@ -136,6 +138,8 @@ export async function GET(
 
           const lessonId = String(lesson._id);
           const isLessonCompleted = userProgressMap.has(lessonId);
+          
+          console.log(`  📝 Lesson "${lesson.title}" (${lessonId}): isCompleted=${isLessonCompleted}`);
 
           return {
             id: lessonId,
